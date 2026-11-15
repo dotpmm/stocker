@@ -147,7 +147,6 @@ suggestions are especially welcome.
 
 - [@woterr](https://github.com/woterr): Markets tab, sector filters, deep-dive sheet, settings, and the v2 design
   system (pull request #1)
-- Built with help from Claude (Anthropic)
 
 ## Licence
 
