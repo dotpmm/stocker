@@ -16,7 +16,7 @@ data class LinkedArticle(val article: Article, val ticker: String, val strength:
 /** Lightweight record used for duplicate detection. */
 data class KnownArticle(val id: String, val cluster: String, val title: String, val publishedAt: Long)
 
-class StockerDb(context: Context) : SQLiteOpenHelper(context.applicationContext, "stocker.db", null, 1) {
+class StockerDb(context: Context) : SQLiteOpenHelper(context.applicationContext, "stocker.db", null, 2) {
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
@@ -44,6 +44,7 @@ class StockerDb(context: Context) : SQLiteOpenHelper(context.applicationContext,
                 trend TEXT NOT NULL, fetched_at INTEGER NOT NULL)""",
         )
         db.execSQL("CREATE TABLE chart_cache(k TEXT PRIMARY KEY, fetched_at INTEGER NOT NULL, body TEXT NOT NULL)")
+        db.execSQL("CREATE TABLE research_cache(k TEXT PRIMARY KEY, fetched_at INTEGER NOT NULL, body TEXT NOT NULL)")
         db.execSQL("CREATE TABLE ai_cache(k TEXT PRIMARY KEY, created_at INTEGER NOT NULL, body TEXT NOT NULL)")
         db.execSQL(
             """CREATE TABLE source_health(
@@ -53,7 +54,12 @@ class StockerDb(context: Context) : SQLiteOpenHelper(context.applicationContext,
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // Version 1 only so far.
+        if (oldVersion < 2) {
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS research_cache(k TEXT PRIMARY KEY, " +
+                    "fetched_at INTEGER NOT NULL, body TEXT NOT NULL)",
+            )
+        }
     }
 
     fun <T> inTransaction(block: () -> T): T {
@@ -232,7 +238,7 @@ class StockerDb(context: Context) : SQLiteOpenHelper(context.applicationContext,
         }
 
     fun cacheGet(table: String, key: String, minTime: Long): String? {
-        val timeColumn = if (table == "chart_cache") "fetched_at" else "created_at"
+        val timeColumn = if (table == "ai_cache") "created_at" else "fetched_at"
         return readableDatabase.rawQuery(
             "SELECT body FROM $table WHERE k=? AND $timeColumn>=?", arrayOf(key, minTime.toString()),
         ).use { c -> if (c.moveToFirst()) c.getString(0) else null }
@@ -241,7 +247,7 @@ class StockerDb(context: Context) : SQLiteOpenHelper(context.applicationContext,
     fun cachePut(table: String, key: String, body: String, now: Long) {
         val values = ContentValues().apply {
             put("k", key)
-            put(if (table == "chart_cache") "fetched_at" else "created_at", now)
+            put(if (table == "ai_cache") "created_at" else "fetched_at", now)
             put("body", body)
         }
         writableDatabase.insertWithOnConflict(table, null, values, SQLiteDatabase.CONFLICT_REPLACE)
@@ -296,8 +302,14 @@ class StockerDb(context: Context) : SQLiteOpenHelper(context.applicationContext,
             db.execSQL("DELETE FROM article_stock WHERE article_id NOT IN (SELECT id FROM articles)")
             db.execSQL("DELETE FROM events WHERE epoch_day<?", arrayOf<Any>(eventsBeforeDay))
             db.execSQL("DELETE FROM chart_cache WHERE fetched_at<?", arrayOf<Any>(olderThanMs))
+            db.execSQL("DELETE FROM research_cache WHERE fetched_at<?", arrayOf<Any>(olderThanMs))
             db.execSQL("DELETE FROM ai_cache WHERE created_at<?", arrayOf<Any>(olderThanMs))
         }
+    }
+
+    /** Drops the research TTL cache so the next screen refetches live data. */
+    fun clearResearchCache() {
+        writableDatabase.execSQL("DELETE FROM research_cache")
     }
 
     fun clearNews() {

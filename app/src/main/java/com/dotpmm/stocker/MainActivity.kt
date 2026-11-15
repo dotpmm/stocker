@@ -7,7 +7,6 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.dotpmm.stocker.ui.StockerRoot
-import com.dotpmm.stocker.ui.theme.StockerTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,8 +15,7 @@ class MainActivity : ComponentActivity() {
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
         )
-        setContent {
-            StockerTheme { StockerRoot() }
-        }
+        // The theme is applied inside StockerRoot, which owns the settings that drive it.
+        setContent { StockerRoot() }
     }
 }

@@ -17,8 +17,8 @@ android {
         applicationId = "com.dotpmm.stocker"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.5.0"
+        versionCode = 4
+        versionName = "2.1.0"
     }
 
     signingConfigs {
@@ -53,6 +53,15 @@ android {
     buildFeatures {
         compose = true
     }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            all { test ->
+                test.systemProperty("stocker.live", System.getProperty("stocker.live") ?: "false")
+            }
+        }
+    }
 }
 
 kotlin {
@@ -75,4 +84,10 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation(libs.junit)
     testImplementation(libs.org.json)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.test.ext.junit)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

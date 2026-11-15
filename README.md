@@ -1,13 +1,13 @@
 <h1 align="center">Stocker</h1>
 
 <p align="center">
-  Every credible headline for every stock you follow, on one pure-black screen.<br>
-  A free, on-device Android app for Indian (NSE/BSE) and US stock watchlists.
+  India's macro cycle first, stocks last.<br>
+  A Coffee-Can research surface for NSE equities, in the Monochrome Exchange design language.
 </p>
 
 <p align="center">
   <a href="https://github.com/dotpmm/stocker/actions/workflows/android.yml"><img alt="Android CI" src="https://github.com/dotpmm/stocker/actions/workflows/android.yml/badge.svg"></a>
-  <img alt="Version" src="https://img.shields.io/badge/version-1.5.0-9DB8FF">
+  <img alt="Version" src="https://img.shields.io/badge/version-2.0.0-9DB8FF">
   <img alt="Android 8.0+" src="https://img.shields.io/badge/Android-8.0%2B-3DDC97">
   <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-Jetpack%20Compose-7F52FF">
   <img alt="License" src="https://img.shields.io/badge/license-proprietary-555">
@@ -15,62 +15,100 @@
 
 ---
 
-## Status: v1.5, the first working app
+## Status: v2.0, news plus research
 
-v1.5 replaces the sample data of v1.0 with the real thing: live news from curated feeds, per-company sorting,
-tone and event tags, prices for Indian stocks, a 12-hour background refresh, a reader, and an optional Gemini
-summary. It is a first build of the data layer, so some feeds will be down or blocked on any given day; the
-**Source health** list in Settings shows exactly which ones worked on your phone.
-
-Get it from the [Releases](https://github.com/dotpmm/stocker/releases) page (Android 8.0 or newer). The repository
-is currently private, so releases are visible only to people with access.
+v2.0 adds the Coffee-Can macro research surface described in [`FUNCTIONALITY.md`](FUNCTIONALITY.md),
+rendered in the metal-and-blur language of [`design.md`](design.md). **Everything from v1.5 is still
+here** — the watchlist, the news pipeline, the reader, events and the optional Gemini summary — all
+restyled into the same system.
 
 ## What Stocker is
 
-You keep a watchlist of 5 to 50 companies. Stocker collects news from a curated set of credible sources, sorts it
-per company **without AI** (rules for entity matching, sentiment and event tags), shows what is coming up
-(earnings, board meetings, major developments), and presents everything in a clean reader. An optional button asks
-Gemini, with **your own free API key**, to summarise a stock's recent news. Nothing leaves your phone except the
-requests to the news feeds and to Gemini when you press the button.
+Two halves that share one design language:
+
+**Your watchlist and its news.** You keep 5 to 50 companies. Stocker collects news from about 20
+curated sources, sorts it per company without AI (entity linking, duplicate clustering, rule-based
+tone and event tags), shows what is coming up, and presents it in a clean reader. An optional
+button asks Gemini, with your own free key, to summarise a stock's recent news.
+
+**The macro research surface.** NIFTY 50 hero and six macro sectors, each judged by its
+market-cap-weighted trailing P/E against a 5Y baseline. Tap a sector for every mapped Nifty-200
+stock in it, filtered by the persisted Coffee-Can toggles. Tap a row for the deep-dive: verdict,
+valuation gauge, fundamentals, and a noise-filter chart with earnings dots.
+
+The research philosophy: **the economic cycle first, stocks last. The valuation gauge and the 5Y
+revenue CAGR are the noise filter.**
 
 | | |
 | --- | --- |
 | Markets | NSE / BSE first-class. US stocks are news-only. |
 | Cost | Free. No account, no backend, no ads, no tracking. |
-| Freshness | Refreshes every 12 hours in the background, plus pull-to-refresh. |
+| Freshness | Background refresh on your schedule, plus refresh on demand. |
 | AI | Optional. Bring your own Gemini key; it is stored only on the device. |
+| Data | Yahoo Finance's public endpoints, TTL-cached with stale-serve-on-failure. |
+| Design | Monochrome + metal, direction-only red/green, tabular numerals, draw-in motion. |
+
+## The design language
+
+**Monochrome is the identity, colour is the signal.** 95% of the interface is black, white and
+gray. The muted sage `#5fa87a` and clay `#d3705f` appear only to encode market direction, and
+always carry a ▲/▼ glyph so colour is never the only signal. Every surface is a perfectly neutral
+gray — depth comes from luminance, never from a hue.
+
+**Surfaces are metal, lit from one place.** The app sits in a brushed-charcoal room with a single
+118° beam entering from the top-left. Every raised panel is a top-lit plate with a bright upper
+bevel that falls away down its face. Depth comes from the light's direction, never from borders.
+
+**Motion is instructional.** The chart draws in line → gradient → glow → endpoint dot. Numerals
+count up. Digits roll. The search box fires a dot-field aura for exactly 1050ms and then goes
+completely quiet. While data is in flight the UI looks like it is *thinking* — sweeping skeletons,
+a breathing glow, a dot orbiting the panel border. Spinners are banned.
+
+**Reduced motion is complete, not partial.** Every transform collapses to an instant fade, charts
+render fully drawn, the ticker stops rolling, and the burst never fires.
 
 ## Features
 
-- [x] Obsidian design system: pure black canvas, no borders or cards, Inter and Space Grotesk, tabular numerals
-- [x] Watchlist of NSE, BSE and US stocks, added by company name or ticker (built-in suggestions work offline)
-- [x] News from about 20 sources: ET, Mint, BusinessLine, NDTV Profit, Pulse, SEBI, RBI, CNBC, MarketWatch, plus
-      Moneycontrol, Business Standard, CNBC-TV18 and Financial Express through Google News
-- [x] Per-company news sorted without AI: entity linking, duplicate clustering ("+3 sources"), event tags
-- [x] Rule-based tone (positive / neutral / negative) per story and per stock
+**Watchlist and news**
+- [x] Watchlist of NSE, BSE and US stocks, added by name or ticker (offline suggestions included)
+- [x] News from about 20 sources: ET, Mint, BusinessLine, NDTV Profit, Pulse, SEBI, RBI, CNBC,
+      MarketWatch, plus Moneycontrol, Business Standard, CNBC-TV18 and Financial Express
+- [x] Per-company sorting without AI: entity linking, duplicate clustering, event tags
+- [x] Rule-based tone per story and per stock
 - [x] Upcoming events (results, board meetings, record dates) detected from news
-- [x] Prices, 1D to 1Y charts and NIFTY 50 / SENSEX for Indian stocks (unofficial Yahoo Finance endpoint)
+- [x] Prices, 1D–1Y charts and NIFTY 50 / SENSEX
 - [x] Reader view with related coverage and a link to the original
-- [x] Optional AI summary with your own Gemini key, cached per set of stories
-- [x] 12-hour background refresh, plus refresh on demand and when you open the app after a while
-- [x] Source health screen
-- [ ] Topic profiles for indirect-impact news (peers, executives, regulators)
-- [ ] NSE and BSE exchange filings (bot-protected, needs a WebView cookie approach)
-- [ ] CSV watchlist import, home-screen widgets
-- [ ] Fundamentals "number fetcher": P/E, P/B, 52-week range, revenue and charts
+- [x] Optional AI summary with your own Gemini key, cached per story set
+- [x] Background refresh, plus refresh on demand
+- [x] Source health list
 
-## Design
+**Macro research**
+- [x] NIFTY hero, six sector plates, verdict badges, market-cap-weighted P/E vs 5Y baseline
+- [x] Sector interdependence graph (optional, in Settings)
+- [x] Sector drill-down with persisted filters (Structure / Valuation / Growth & Size)
+- [x] Deep-dive: reality-check gauge, narrative, fundamentals, noise-filter chart, earnings dots
+- [x] Universe-wide search by ticker or company name
+- [x] Google Finance deep link per stock
 
-Pure black, nothing but text and space. Selection is a sliding underline, the primary action is one solid bar, and
-the only floating element is the navigation bar. The rules and the reasoning are in
-[docs/design-directions.md](docs/design-directions.md).
+**Craft**
+- [x] Metal + blur design system with the full Neural Expressive motion set
+- [x] AMOLED mode that keeps the metal readable
+- [x] Extensive appearance and behaviour settings, all live
+- [x] TTL cache with stale-serve-on-failure
+- [x] 259 unit tests, including reference-parity and render harnesses
+- [ ] Light mode (the palette inverts; the direction pair is unchanged)
+- [ ] Home-screen widget for the macro verdicts
 
 ## Tech
 
-Kotlin 2.2, Jetpack Compose (Material 3), AGP 8.11, Gradle 8.14 with a version catalog, minSdk 26, targetSdk 36,
-R8 minification and resource shrinking on release. Deliberately few dependencies: plain SQLite, the platform HTTP
-and XML parsers, WorkManager and coroutines, so there is no annotation-processing step to break. Unit tests cover
-the rule-based language pipeline. Details in [docs/architecture.md](docs/architecture.md).
+Kotlin 2.2, Jetpack Compose, AGP 8.11, Gradle 8.14 with a version catalog, minSdk 26, targetSdk 36,
+R8 minification and resource shrinking on release. Deliberately few dependencies: plain SQLite for
+the cache, the platform HTTP stack, and coroutines — no Room, no OkHttp, no DI, no annotation
+processing.
+
+The curated dataset (sectors, constituents, moats, narratives, dependency weights) and the
+Nifty-200 list ship as versioned JSON assets. All computations are ported verbatim from the
+reference implementation and pinned by tests in `ReferenceParityTest`.
 
 ## Build
 
@@ -78,50 +116,36 @@ the rule-based language pipeline. Details in [docs/architecture.md](docs/archite
 git clone https://github.com/dotpmm/stocker.git
 cd stocker
 ./gradlew assembleDebug          # app/build/outputs/apk/debug/app-debug.apk
+./gradlew testDebugUnitTest      # 259 tests
 ```
 
-Requires JDK 17 and the Android SDK (platform 36). More in [docs/building.md](docs/building.md). Releases are cut by
-pushing a `v*` tag, see [docs/releasing.md](docs/releasing.md).
+Requires JDK 17+ and the Android SDK (platform 36). Releases are cut by pushing a `v*` tag, see
+[docs/releasing.md](docs/releasing.md).
 
-## Roadmap
+### Verifying without a device
 
-1. **v1.0**: Obsidian UI on sample data.
-2. **v1.5 (this release)**: live news pipeline, prices, events, reader, AI summary, background refresh.
-3. **v1.6**: topic profiles for indirect-impact news, per-source on/off, notifications (off by default).
-4. **v1.7**: exchange filings, CSV import, widgets.
-5. **v2**: fundamentals number fetcher and AI questions over those numbers.
+`./gradlew testDebugUnitTest` renders the real screens through Robolectric and writes PNGs to
+`app/build/screenshots/`, so the visual language can be inspected on a machine where the Android
+emulator cannot run. The render harnesses also assert that charts survive degenerate series
+(empty, single-point, perfectly flat) and that reduced motion leaves every glyph in place.
 
 ## Documentation
 
 | Doc | What it covers |
 | --- | --- |
-| [Product spec](docs/product-spec.md) | What the app does and does not do |
+| [Functionality spec](FUNCTIONALITY.md) | Every screen, computation and API payload this app implements |
+| [Design guide](design.md) | The Monochrome Exchange + Metal Finish system and its hard rules |
 | [Architecture](docs/architecture.md) | Layers, data flow, tech choices |
-| [Design directions](docs/design-directions.md) | The Obsidian rules |
-| [News sources research](docs/research/news-sources.md) | Credible Indian and US sources |
-| [Prior art](docs/research/github-prior-art.md) | What similar open projects do |
-| [Fundamentals data](docs/research/fundamentals-data.md) | Where the numbers could come from |
-| [Decision 0001](docs/decisions/0001-app-framework.md) | Why native Kotlin |
-| [Decision 0002](docs/decisions/0002-storage-and-dependencies.md) | Why plain SQLite and few dependencies |
 | [Building](docs/building.md) / [Releasing](docs/releasing.md) | Build and release process |
-
-## Contributing
-
-Read [CONTRIBUTING.md](CONTRIBUTING.md) first, then open an issue or a pull request. Bug reports and news-source
-suggestions are especially welcome.
-
-## Acknowledgements
-
-- [Inter](https://rsms.me/inter/) and [Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk), SIL Open Font License 1.1 ([licences](docs/third-party/))
-- Android Jetpack, Jetpack Compose and Kotlin, Apache License 2.0
-- Market and news publishers whose public feeds the app reads; articles remain their publishers' property and open in the source
 
 ## Licence
 
-Proprietary, source-available. All rights reserved; see [LICENSE](LICENSE). Personal, non-commercial use of release
-builds is allowed.
+Proprietary, source-available. All rights reserved; see [LICENSE](LICENSE). Personal, non-commercial
+use of release builds is allowed.
 
 ## Disclaimer
 
-Stocker provides information only. Nothing in the app is financial advice, an offer, or a recommendation to buy or
-sell any security. Sentiment tags are produced by simple rules and can be wrong.
+Stocker provides information only. Nothing in the app is financial advice, an offer, or a
+recommendation to buy or sell any security. Verdicts are mechanical thresholds, not opinions, and
+can be wrong. Sector P/E baselines are documented estimates; free historical sector P/E does not
+exist.

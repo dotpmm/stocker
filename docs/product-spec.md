@@ -2,7 +2,13 @@
 
 Owner: Prajwal (GitHub: dotpmm). Last updated: 2026-11-15.
 
-## Goal
+> **Superseded in v2.0.** The product is now the Coffee-Can research surface described in
+> [`FUNCTIONALITY.md`](../FUNCTIONALITY.md), rendered in the design system in
+> [`design.md`](../design.md). The watchlist, news pipeline, reader and AI summary described below
+> were removed by design. This file is kept for the history of how the app got here; treat
+> `FUNCTIONALITY.md` as the spec.
+
+## Original goal (v1.5)
 
 A free Android app that tells you everything about the stocks you follow, starting with news. It must look and
 feel like a finished consumer product (pitch black, polished, not "made for myself") because it will later be

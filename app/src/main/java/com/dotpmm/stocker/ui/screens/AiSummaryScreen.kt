@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,11 +39,13 @@ import com.dotpmm.stocker.domain.ai.AiSummary
 import com.dotpmm.stocker.domain.ai.GeminiException
 import com.dotpmm.stocker.domain.model.Article
 import com.dotpmm.stocker.domain.model.WatchStock
-import com.dotpmm.stocker.ui.components.PrimaryActionBar
 import com.dotpmm.stocker.ui.components.pressable
 import com.dotpmm.stocker.ui.icons.StockerIcons
-import com.dotpmm.stocker.ui.theme.Obsidian
-import com.dotpmm.stocker.ui.theme.StockerText
+import com.dotpmm.stocker.ui.theme.Ink
+import com.dotpmm.stocker.ui.theme.LocalReducedMotion
+import com.dotpmm.stocker.ui.theme.Type
+import com.dotpmm.stocker.ui.theme.flat
+import com.dotpmm.stocker.ui.theme.metal
 import kotlin.coroutines.cancellation.CancellationException
 
 private sealed interface AiUiState {
@@ -86,53 +88,26 @@ fun AiSummaryScreen(
 
     Column(modifier.fillMaxSize()) {
         Row(
-            Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .padding(horizontal = 8.dp),
+            Modifier.fillMaxWidth().padding(start = 8.dp, end = 14.dp, top = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TopIconButton(StockerIcons.Back, "Back", onBack)
-            Text("AI SUMMARY · ${stock.ticker}", style = StockerText.SectionLabel.copy(letterSpacing = 1.68.sp))
-            TopIconButton(
-                StockerIcons.Refresh, "Run again", { attempt++ },
-                spinning = state is AiUiState.Loading,
-            )
+            IconTap(StockerIcons.Back, "Back", onBack)
+            Text("AI SUMMARY · ${stock.ticker}", style = Type.MicroData.copy(fontSize = 13.sp))
+            IconTap(StockerIcons.Refresh, "Run again", { attempt++ })
         }
         Column(
             Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(22.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
-            Text(stock.name, style = StockerText.Body)
+            Text(stock.name, style = Type.Caption)
             when (val s = state) {
-                AiUiState.Loading -> Pulse("Reading recent stories…")
-                AiUiState.NoKey -> {
-                    Text("Add your Gemini key", style = StockerText.TabLarge)
-                    Text(
-                        "AI summaries use your own free Gemini API key from aistudio.google.com. It is stored only on this phone.",
-                        style = StockerText.Body,
-                    )
-                    PrimaryActionBar(
-                        label = "Open settings",
-                        leadingIcon = StockerIcons.Spark,
-                        trailingIcon = StockerIcons.Arrow,
-                        onClick = onOpenSettings,
-                    )
-                }
-                is AiUiState.Failed -> {
-                    Text("Couldn't summarise", style = StockerText.TabLarge)
-                    Text(s.message, style = StockerText.Body)
-                    PrimaryActionBar(
-                        label = "Try again",
-                        leadingIcon = StockerIcons.Refresh,
-                        trailingIcon = StockerIcons.Arrow,
-                        onClick = { attempt++ },
-                    )
-                }
+                AiUiState.Loading -> Breathing("Reading recent stories…")
+                AiUiState.NoKey -> KeyPrompt(onOpenSettings)
+                is AiUiState.Failed -> Failure(s.message) { attempt++ }
                 is AiUiState.Done -> SummaryBody(s, onOpenArticle)
             }
             Spacer(Modifier.height(28.dp).navigationBarsPadding())
@@ -140,37 +115,85 @@ fun AiSummaryScreen(
     }
 }
 
+/** The loading state breathes rather than spinning (design.md §8.2 bans spinners). */
 @Composable
-private fun Pulse(text: String) {
-    val transition = rememberInfiniteTransition(label = "pulse")
+private fun Breathing(text: String) {
+    val reduced = LocalReducedMotion.current
+    if (reduced) {
+        Text(text, style = Type.PanelTitle.copy(fontSize = 17.sp))
+        return
+    }
+    val transition = rememberInfiniteTransition(label = "breathe")
     val alpha by transition.animateFloat(
-        initialValue = 0.35f,
+        initialValue = 0.4f,
         targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(800), RepeatMode.Reverse),
-        label = "alpha",
+        animationSpec = infiniteRepeatable(tween(1400), RepeatMode.Reverse),
+        label = "breatheAlpha",
     )
-    Text(text, style = StockerText.TabLarge, modifier = Modifier.graphicsLayer { this.alpha = alpha })
+    Text(
+        text,
+        style = Type.PanelTitle.copy(fontSize = 17.sp),
+        modifier = Modifier.graphicsLayer { this.alpha = alpha },
+    )
+}
+
+@Composable
+private fun KeyPrompt(onOpenSettings: () -> Unit) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .flat(Ink.Surface1, RoundedCornerShape(18.dp), 18.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text("Add your Gemini key", style = Type.PanelTitle.copy(fontSize = 17.sp))
+        Text(
+            "AI summaries use your own free Gemini API key from aistudio.google.com. It is stored " +
+                "only on this phone and used only when you tap the button.",
+            style = Type.BodyTight,
+        )
+        ActionPill(label = "Open settings", onClick = onOpenSettings, leading = StockerIcons.Spark)
+    }
+}
+
+@Composable
+private fun Failure(message: String, onRetry: () -> Unit) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .flat(Ink.Surface1, RoundedCornerShape(18.dp), 18.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text("Couldn't summarise", style = Type.PanelTitle.copy(fontSize = 17.sp))
+        Text(message, style = Type.BodyTight)
+        ActionPill(label = "Try again", onClick = onRetry, leading = StockerIcons.Refresh)
+    }
 }
 
 @Composable
 private fun SummaryBody(done: AiUiState.Done, onOpenArticle: (String) -> Unit) {
     val s = done.summary
-    val stanceColor: Color = when (s.stance) {
-        "positive" -> Obsidian.Positive
-        "negative" -> Obsidian.Negative
-        else -> Obsidian.TextSecondary
+    val stanceColor = when (s.stance) {
+        "positive" -> Ink.UpText
+        "negative" -> Ink.DownText
+        else -> Ink.TextSecondary
     }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        SectionLabel("AI VIEW")
-        Text(s.stance.replaceFirstChar { it.uppercase() }, style = StockerText.Price.copy(fontSize = 38.sp, color = stanceColor))
+        SectionMicro("AI view")
+        Text(
+            s.stance.replaceFirstChar { it.uppercase() },
+            style = Type.Section.copy(color = stanceColor),
+        )
     }
-    if (s.summary.isNotBlank()) Text(s.summary, style = StockerText.ReaderBody)
-    PointSection("WHAT'S DRIVING IT", s.drivers, done.articles, onOpenArticle)
-    PointSection("RISKS", s.risks, done.articles, onOpenArticle)
-    PointSection("TO WATCH", s.upcoming, done.articles, onOpenArticle)
+    if (s.summary.isNotBlank()) Text(s.summary, style = Type.Body)
+    PointSection("What's driving it", s.drivers, done.articles, onOpenArticle)
+    PointSection("Risks", s.risks, done.articles, onOpenArticle)
+    PointSection("To watch", s.upcoming, done.articles, onOpenArticle)
     Text(
-        "Generated by Gemini from ${done.articles.size} headlines and summaries. It can be wrong and is not financial advice.",
-        style = StockerText.Caption.copy(color = Obsidian.TextSubtle),
+        "Generated by Gemini from ${done.articles.size} headlines and summaries. It can be wrong and " +
+            "is not financial advice.",
+        style = Type.MicroData.copy(fontSize = 11.5.sp),
     )
 }
 
@@ -182,8 +205,14 @@ private fun PointSection(
     onOpenArticle: (String) -> Unit,
 ) {
     if (points.isEmpty()) return
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        SectionLabel(title)
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .flat(Ink.Surface1, RoundedCornerShape(18.dp), 18.dp)
+            .padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        SectionMicro(title)
         points.forEach { point ->
             val refs = point.refs.mapNotNull { articles.getOrNull(it - 1) }
             val sources = refs.map { it.source }.distinct().joinToString(", ")
@@ -192,15 +221,16 @@ private fun PointSection(
                     .fillMaxWidth()
                     .pressable(
                         onClick = { refs.firstOrNull()?.let { onOpenArticle(it.id) } },
-                        pressedScale = 0.98f,
-                        pressedAlpha = 0.6f,
+                        pressedScale = 0.985f,
                     ),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Box(Modifier.padding(top = 8.dp).size(6.dp).background(Obsidian.Accent))
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(point.text, style = StockerText.Point)
-                    if (sources.isNotEmpty()) Text(sources, style = StockerText.Caption)
+                Box(Modifier.padding(top = 7.dp).size(4.dp).background(Ink.TextPrimary))
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(point.text, style = Type.BodyTight.copy(color = Ink.TextPrimary))
+                    if (sources.isNotEmpty()) {
+                        Text(sources, style = Type.MicroData.copy(fontSize = 11.5.sp))
+                    }
                 }
             }
         }

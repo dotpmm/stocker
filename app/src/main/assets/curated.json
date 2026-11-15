@@ -1,0 +1,578 @@
+{
+ "version": 1,
+ "sector_order": [
+  "fmcg",
+  "it",
+  "power",
+  "retail",
+  "banking",
+  "pharma"
+ ],
+ "sectors": [
+  {
+   "id": "fmcg",
+   "name": "FMCG",
+   "index_symbol": "^CNXFMCG",
+   "pe_5y_avg": 38.0,
+   "blurb": "Staples compound through cycles; the sector's sin is paying 40x+ for certainty. The knife falls in a bad monsoon or an input-cost spike.",
+   "companies": [
+    {
+     "symbol": "HINDUNILVR",
+     "name": "Hindustan Unilever",
+     "moat": "Brand Trust",
+     "monopoly": false,
+     "cultural": true,
+     "defensive": true,
+     "note": ""
+    },
+    {
+     "symbol": "ITC",
+     "name": "ITC",
+     "moat": "Brand Trust",
+     "monopoly": true,
+     "cultural": false,
+     "defensive": true,
+     "note": ""
+    },
+    {
+     "symbol": "NESTLEIND",
+     "name": "Nestle India",
+     "moat": "Brand Trust",
+     "monopoly": false,
+     "cultural": true,
+     "defensive": true,
+     "note": ""
+    },
+    {
+     "symbol": "BRITANNIA",
+     "name": "Britannia Industries",
+     "moat": "Brand Trust",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": true,
+     "note": ""
+    },
+    {
+     "symbol": "DABUR",
+     "name": "Dabur India",
+     "moat": "Brand Trust",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": true,
+     "note": ""
+    },
+    {
+     "symbol": "MARICO",
+     "name": "Marico",
+     "moat": "Brand Trust",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": true,
+     "note": ""
+    },
+    {
+     "symbol": "GODREJCP",
+     "name": "Godrej Consumer",
+     "moat": "Brand Trust",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "COLPAL",
+     "name": "Colgate-Palmolive India",
+     "moat": "Cost Advantage",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "it",
+   "name": "Information Technology",
+   "index_symbol": "^CNXIT",
+   "pe_5y_avg": 26.0,
+   "blurb": "Multi-decade switching-cost annuities priced off US/EM spend. The cycle: campus hiring booms, dollar rupee swings, and client-budget freezes that are noise, not structure.",
+   "companies": [
+    {
+     "symbol": "TCS",
+     "name": "Tata Consultancy Services",
+     "moat": "Switching Cost",
+     "monopoly": false,
+     "cultural": true,
+     "defensive": true,
+     "note": ""
+    },
+    {
+     "symbol": "INFY",
+     "name": "Infosys",
+     "moat": "Switching Cost",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": true,
+     "note": ""
+    },
+    {
+     "symbol": "HCLTECH",
+     "name": "HCL Technologies",
+     "moat": "Switching Cost",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "WIPRO",
+     "name": "Wipro",
+     "moat": "Switching Cost",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "TECHM",
+     "name": "Tech Mahindra",
+     "moat": "Switching Cost",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "LTIM",
+     "name": "LTIMindtree",
+     "moat": "Cost Advantage",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "PERSISTENT",
+     "name": "Persistent Systems",
+     "moat": "Switching Cost",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "COFORGE",
+     "name": "Coforge",
+     "moat": "Cost Advantage",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "power",
+   "name": "Power & Capital Goods",
+   "index_symbol": "^CNXINFRA",
+   "pe_5y_avg": 30.0,
+   "blurb": "India's capex cycle with order books as the truth serum. Regulated returns cap the upside; execution slippage and receivables are where the knives hide.",
+   "companies": [
+    {
+     "symbol": "NTPC",
+     "name": "NTPC",
+     "moat": "Regulatory Barrier",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": true,
+     "note": ""
+    },
+    {
+     "symbol": "POWERGRID",
+     "name": "Power Grid Corporation",
+     "moat": "Regulatory Barrier",
+     "monopoly": true,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "TATAPOWER",
+     "name": "Tata Power",
+     "moat": "Regulatory Barrier",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "ADANIGREEN",
+     "name": "Adani Green Energy",
+     "moat": "Cost Advantage",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "SIEMENS",
+     "name": "Siemens India",
+     "moat": "Switching Cost",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "ABB",
+     "name": "ABB India",
+     "moat": "Switching Cost",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "BEL",
+     "name": "Bharat Electronics",
+     "moat": "Regulatory Barrier",
+     "monopoly": true,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "HAL",
+     "name": "Hindustan Aeronautics",
+     "moat": "Regulatory Barrier",
+     "monopoly": true,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "CGPOWER",
+     "name": "CG Power",
+     "moat": "Cost Advantage",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "POLYCAB",
+     "name": "Polycab India",
+     "moat": "Scale",
+     "monopoly": true,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "retail",
+   "name": "Retail & Discretionary",
+   "index_symbol": "^CNXCONSUM",
+   "pe_5y_avg": 42.0,
+   "blurb": "Unorganized-to-organized transition is the whole thesis: Titan in jewelry, DMart in groceries, Zudio in apparel. Priced for that transition twice over — hence the brutal reality check.",
+   "companies": [
+    {
+     "symbol": "TITAN",
+     "name": "Titan Company",
+     "moat": "Brand Trust",
+     "monopoly": false,
+     "cultural": true,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "KALYANKJIL",
+     "name": "Kalyan Jewellers",
+     "moat": "Brand Trust",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "DMART",
+     "name": "Avenue Supermarts (DMart)",
+     "moat": "Cost Advantage",
+     "monopoly": false,
+     "cultural": true,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "TRENT",
+     "name": "Trent (Westside/Zudio)",
+     "moat": "Brand Trust",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "ABFRL",
+     "name": "Aditya Birla Fashion",
+     "moat": "Brand Trust",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "PVRINOX",
+     "name": "PVR INOX",
+     "moat": "Scale",
+     "monopoly": true,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "RELIANCE",
+     "name": "Reliance Industries (Retail)",
+     "moat": "Network Effect",
+     "monopoly": true,
+     "cultural": false,
+     "defensive": false,
+     "note": "Conglomerate proxy — the listed way to own Reliance Retail's organized-transition story."
+    },
+    {
+     "symbol": "JUBLFOOD",
+     "name": "Jubilant FoodWorks",
+     "moat": "Brand Trust",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "banking",
+   "name": "Banking & Financials",
+   "index_symbol": "^NSEBANK",
+   "pe_5y_avg": 16.0,
+   "blurb": "A bank is a leveraged moat: deposit franchise is everything. Cheap on book rarely means cheap in reality — watch credit costs, not the P/B trap.",
+   "companies": [
+    {
+     "symbol": "HDFCBANK",
+     "name": "HDFC Bank",
+     "moat": "Scale",
+     "monopoly": false,
+     "cultural": true,
+     "defensive": true,
+     "note": ""
+    },
+    {
+     "symbol": "ICICIBANK",
+     "name": "ICICI Bank",
+     "moat": "Scale",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": true,
+     "note": ""
+    },
+    {
+     "symbol": "SBIN",
+     "name": "State Bank of India",
+     "moat": "Scale",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "KOTAKBANK",
+     "name": "Kotak Mahindra Bank",
+     "moat": "Brand Trust",
+     "monopoly": false,
+     "cultural": true,
+     "defensive": true,
+     "note": ""
+    },
+    {
+     "symbol": "AXISBANK",
+     "name": "Axis Bank",
+     "moat": "Scale",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "INDUSINDBK",
+     "name": "IndusInd Bank",
+     "moat": "None",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "AUBANK",
+     "name": "AU Small Finance Bank",
+     "moat": "Network Effect",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "BANDHANBNK",
+     "name": "Bandhan Bank",
+     "moat": "None",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    }
+   ]
+  },
+  {
+   "id": "pharma",
+   "name": "Pharma & Healthcare",
+   "index_symbol": "^CNXPHARMA",
+   "pe_5y_avg": 30.0,
+   "blurb": "US generics are a commodity knife-fight; India-branded formulations are the moat. FDA warnings and price erosion make the drops — the India franchise makes the recovery.",
+   "companies": [
+    {
+     "symbol": "SUNPHARMA",
+     "name": "Sun Pharmaceutical",
+     "moat": "Scale",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": true,
+     "note": ""
+    },
+    {
+     "symbol": "DRREDDY",
+     "name": "Dr Reddy's Laboratories",
+     "moat": "Cost Advantage",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": true,
+     "note": ""
+    },
+    {
+     "symbol": "CIPLA",
+     "name": "Cipla",
+     "moat": "Brand Trust",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": true,
+     "note": ""
+    },
+    {
+     "symbol": "DIVISLAB",
+     "name": "Divi's Laboratories",
+     "moat": "Cost Advantage",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "LUPIN",
+     "name": "Lupin",
+     "moat": "Cost Advantage",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "AUROPHARMA",
+     "name": "Aurobindo Pharma",
+     "moat": "Cost Advantage",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    },
+    {
+     "symbol": "MANKIND",
+     "name": "Mankind Pharma",
+     "moat": "Brand Trust",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": true,
+     "note": ""
+    },
+    {
+     "symbol": "ALKEM",
+     "name": "Alkem Laboratories",
+     "moat": "Brand Trust",
+     "monopoly": false,
+     "cultural": false,
+     "defensive": false,
+     "note": ""
+    }
+   ]
+  }
+ ],
+ "dependencies": [
+  {
+   "from": "banking",
+   "to": "power",
+   "w": 0.8
+  },
+  {
+   "from": "banking",
+   "to": "retail",
+   "w": 0.7
+  },
+  {
+   "from": "it",
+   "to": "banking",
+   "w": 0.6
+  },
+  {
+   "from": "retail",
+   "to": "fmcg",
+   "w": 0.5
+  },
+  {
+   "from": "banking",
+   "to": "fmcg",
+   "w": 0.4
+  },
+  {
+   "from": "retail",
+   "to": "pharma",
+   "w": 0.4
+  },
+  {
+   "from": "it",
+   "to": "retail",
+   "w": 0.3
+  },
+  {
+   "from": "power",
+   "to": "fmcg",
+   "w": 0.2
+  }
+ ],
+ "narratives": {
+  "TITAN": "Titan runs Tanishq, the jewelry brand that converted India's unorganized gold market into a trusted, hallmarking-led chain — a textbook unorganized-to-organized transition. It belongs in a Coffee Can because the brand compounds family savings into annuity-like store economics, but you pay a permanent premium for that quality.",
+  "DMART": "DMart runs India's most cost-disciplined grocery chain, sacrificing glamour for everyday-low-price density around stores it owns. The cultural moat is the frugality itself — competitors can copy the layout, not the patience.",
+  "HDFCBANK": "HDFC Bank built India's most conservative deposit franchise and refuses to chase yield for growth's sake. The cultural moat is underwriting discipline; you buy it to sleep well, not to double fast.",
+  "TCS": "TCS is the default outsourcer for global banks and airlines, with decade-long contracts that make revenue an annuity. The switching cost is real: replacing TCS mid-program is a board-level event, so it rarely happens.",
+  "ITC": "ITC monetizes cigarettes — a regulated near-duopoly that funds a growing FMCG and hotels empire essentially for free. The moat is regulatory capture of distribution; the risk is the same regulation, and that is why it is permanently cheap.",
+  "SUNPHARMA": "Sun Pharma scaled from generics into specialty (glatiramer, Ilumya) with an India-branded base that funds US R&D. It is the sector's quality compounder — priced accordingly.",
+  "NTPC": "NTPC owns the largest conventional power fleet in India and sells into contracted PPAs with state utilities. Returns are regulated and slow — a bond with a dividend, not a compounder, and it belongs in the defensive slot only when the P/E is humble.",
+  "POWERGRID": "Power Grid owns most of India's transmission corridors — a regulated near-monopoly on the country's electricity highways. The moat is the ROW (right of way) you cannot replicate; the growth is the capex cycle.",
+  "HAL": "HAL is the monopoly supplier of India's military aircraft programs, with order books stretching years into Make-in-India spending. It is a state franchise, not a business — price it like a government bond with equity risk.",
+  "BEL": "BEL holds the defense electronics franchise — radars, communication gear — with competitors kept out by procurement rules. Monopoly economics, PSU execution; the knife falls on order-announcement gaps, not fundamentals.",
+  "RELIANCE": "Reliance Retail is executing India's largest unorganized-to-organized retail transition, funded by O2C cash flows. The stock is the conglomerate, not the store — accept the blended P/E or wait for a deep correction.",
+  "PVRINOX": "PVR INOX is the merged near-monopoly of Indian premium multiplexes. Box-office is the cycle; screen-ownership and ads are the moat — a mediocre compounder at a fair price is better than this at a great one.",
+  "MANKIND": "Mankind built India's largest prescription-led mass-market pharma franchise by pricing chronic medicines for tier-2/3 India. Doctor relationships at that density are a brand moat no newcomer can buy.",
+  "KALYANKJIL": "Kalyan Jewellers is the #2 branded jewelry play riding the same hallmarking transition as Titan, at a fraction of the valuation. The moat is thinner and debt real — a discount story, not a quality one.",
+  "SIEMENS": "Siemens India sits on decades of installed industrial automation base — factories replace, they don't switch. The moat is the installed base; the cycle is capex orders.",
+  "TRENT": "Trent scaled Zudio into India's fastest-growing value-fashion chain with landed-cost economics rivals can't match. The transition story is real; the multiple already believes it."
+ },
+ "fallback_narrative": "{name} operates in {sector} with a {moat} of moat type '{moat}'.{flags} Its Coffee-Can merit rests on whether that moat compounds revenue above inflation — check the 5Y revenue CAGR and the valuation gauge before believing it."
+}
