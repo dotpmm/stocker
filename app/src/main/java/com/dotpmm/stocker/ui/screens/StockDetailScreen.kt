@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,18 +36,28 @@ import com.dotpmm.stocker.domain.model.Quote
 import com.dotpmm.stocker.domain.model.RangeSeries
 import com.dotpmm.stocker.domain.model.UpcomingEvent
 import com.dotpmm.stocker.domain.model.WatchStock
+import com.dotpmm.stocker.research.Point
 import com.dotpmm.stocker.ui.Fmt
-import com.dotpmm.stocker.ui.components.NewsRow
-import com.dotpmm.stocker.ui.components.PrimaryActionBar
-import com.dotpmm.stocker.ui.components.Sparkline
-import com.dotpmm.stocker.ui.components.ToneBar
-import com.dotpmm.stocker.ui.components.UnderlineTabs
+import com.dotpmm.stocker.ui.components.ChangeText
+import com.dotpmm.stocker.ui.components.DirectionGlyph
+import com.dotpmm.stocker.ui.components.PriceChart
+import com.dotpmm.stocker.ui.components.SegmentedControl
 import com.dotpmm.stocker.ui.components.pressable
+import com.dotpmm.stocker.ui.components.rememberCountUp
 import com.dotpmm.stocker.ui.icons.StockerIcons
-import com.dotpmm.stocker.ui.theme.Obsidian
-import com.dotpmm.stocker.ui.theme.StockerText
+import com.dotpmm.stocker.ui.theme.Direction
+import com.dotpmm.stocker.ui.theme.Ink
+import com.dotpmm.stocker.ui.theme.LocalSettings
+import com.dotpmm.stocker.ui.theme.Type
+import com.dotpmm.stocker.ui.theme.directionOf
+import com.dotpmm.stocker.ui.theme.flat
+import com.dotpmm.stocker.ui.theme.metal
 import kotlinx.coroutines.launch
 
+/**
+ * The per-stock screen: live chart with the range selector, news tone, upcoming events and the
+ * filtered news feed, plus the optional Gemini summary.
+ */
 @Composable
 fun StockDetailScreen(
     stock: WatchStock,
@@ -58,154 +69,106 @@ fun StockDetailScreen(
     modifier: Modifier = Modifier,
 ) {
     val store = StockerApp.instance.store
+    val settings = LocalSettings.current
     val scope = rememberCoroutineScope()
     val refresh by store.refresh.collectAsState()
     val version by store.dataVersion.collectAsState()
-    var rangeIndex by rememberSaveable { mutableIntStateOf(0) }
+    var rangeIndex by rememberSaveable { mutableIntStateOf(settings.defaultRangeIndex.coerceIn(0, 4)) }
     var sortIndex by rememberSaveable { mutableIntStateOf(0) }
     var confirmRemove by remember { mutableStateOf(false) }
     val hasPrice = stock.market == Market.India
 
     val quote by rememberQuery<Quote?>(null, stock.ticker) { store.quoteOf(stock) }
-    val news by rememberQuery(emptyList<NewsItem>(), stock.ticker, sortIndex) { store.newsFor(stock.ticker, top = sortIndex == 1) }
+    val news by rememberQuery(emptyList<NewsItem>(), stock.ticker, sortIndex) {
+        store.newsFor(stock.ticker, top = sortIndex == 1)
+    }
     val events by rememberQuery(emptyList<UpcomingEvent>(), stock.ticker) { store.eventsFor(stock.ticker) }
     val spec = StockerStore.ranges[rangeIndex.coerceIn(0, StockerStore.ranges.lastIndex)]
     val series by produceState<RangeSeries?>(null, stock.ticker, spec.range, version) {
         value = if (hasPrice) store.series(stock, spec) else null
     }
     val tone = remember(news) { store.toneCounts(news) }
-    val sideInset = Modifier.padding(horizontal = 20.dp)
+    val shownPrice = rememberCountUp(quote?.price ?: 0.0)
 
     Column(modifier.fillMaxSize()) {
         Row(
-            Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .padding(horizontal = 8.dp),
+            Modifier.fillMaxWidth().padding(start = 8.dp, end = 14.dp, top = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TopIconButton(StockerIcons.Back, "Back", onBack)
-            Text("${stock.ticker} · ${stock.exchange}", style = StockerText.SectionLabel.copy(letterSpacing = 1.68.sp))
-            TopIconButton(
-                StockerIcons.Refresh, "Refresh news", { store.launchRefresh(stock.ticker) },
-                spinning = refresh.running,
+            IconTap(StockerIcons.Back, "Back", onBack)
+            Text("${stock.ticker} · ${stock.exchange}", style = Type.MicroData.copy(fontSize = 13.sp))
+            IconTap(
+                StockerIcons.Refresh,
+                "Refresh news",
+                { store.launchRefresh(stock.ticker) },
             )
         }
 
         LazyColumn(Modifier.weight(1f), contentPadding = contentPadding) {
             item(key = "price") {
-                Column(sideInset.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(stock.name, style = StockerText.Body)
-                    if (hasPrice) {
-                        val shown = series
-                        val shownQuote = quote
-                        val color = when {
-                            shown != null -> Fmt.changeColor(shown.changePct)
-                            shownQuote != null -> Fmt.changeColor(shownQuote.changePct)
-                            else -> Obsidian.Neutral
-                        }
-                        Text(
-                            if (shownQuote != null) Fmt.price(shownQuote.price) else "—",
-                            style = StockerText.Price,
-                        )
-                        if (shown != null) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
-                                val arrow = if (shown.changePct >= 0) "▲" else "▼"
-                                Text(
-                                    "$arrow ${Fmt.signed(shown.changeAbs)} (${Fmt.percent(shown.changePct)})",
-                                    style = StockerText.Change.copy(color = color),
-                                )
-                                Text(shown.caption, style = StockerText.Meta)
-                            }
-                            Sparkline(
-                                points = shown.points,
-                                color = color,
-                                showEndDot = true,
-                                modifier = Modifier
-                                    .padding(top = 14.dp)
-                                    .fillMaxWidth()
-                                    .height(72.dp),
-                            )
-                        } else {
-                            Text(
-                                if (shownQuote == null) "Price unavailable right now" else "Loading chart…",
-                                style = StockerText.Meta,
-                            )
-                            Spacer(Modifier.height(86.dp))
-                        }
-                        UnderlineTabs(
-                            labels = StockerStore.ranges.map { it.label },
-                            selectedIndex = rangeIndex,
-                            onSelect = { rangeIndex = it },
-                            fillWidth = true,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    } else {
-                        Text("News only for US stocks", style = StockerText.Meta)
-                    }
-                }
+                PriceHeader(
+                    stock = stock,
+                    quote = quote,
+                    series = series,
+                    shownPrice = shownPrice,
+                    hasPrice = hasPrice,
+                    rangeIndex = rangeIndex,
+                    onRange = { rangeIndex = it },
+                )
             }
 
-            item(key = "tone") {
-                Column(
-                    sideInset.fillMaxWidth().padding(top = 26.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp),
-                ) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("NEWS TONE · LAST 3 DAYS", style = StockerText.SectionLabel)
-                        Text("${tone.total} stories", style = StockerText.Meta)
-                    }
-                    if (tone.total > 0) {
-                        ToneBar(tone.positive, tone.neutral, tone.negative)
-                        Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                            Text("${tone.positive} positive", style = StockerText.Meta.copy(color = Obsidian.TextSecondary))
-                            Text("${tone.neutral} neutral", style = StockerText.Meta.copy(color = Obsidian.TextSecondary))
-                            Text("${tone.negative} negative", style = StockerText.Meta.copy(color = Obsidian.TextSecondary))
-                        }
-                    } else {
-                        Text(
-                            if (refresh.running) "Gathering news…" else "No stories in the last 3 days. Try refreshing.",
-                            style = StockerText.Body,
-                        )
-                    }
-                    PrimaryActionBar(
-                        label = "AI summary",
-                        leadingIcon = StockerIcons.Spark,
-                        trailingIcon = StockerIcons.Arrow,
-                        onClick = onAiSummary,
-                        modifier = Modifier.padding(top = 4.dp),
+            if (settings.showTone) {
+                item(key = "tone") {
+                    TonePanel(
+                        counts = tone,
+                        running = refresh.running,
+                        onAiSummary = onAiSummary,
                     )
-                    Text("Uses your Gemini key · Not financial advice", style = StockerText.Caption.copy(color = Obsidian.TextSubtle))
                 }
             }
 
-            item(key = "upcoming") {
-                Column(
-                    sideInset.fillMaxWidth().padding(top = 26.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    SectionLabel("UPCOMING")
-                    if (events.isEmpty()) {
-                        Text("No scheduled events found in recent news.", style = StockerText.Body)
-                    } else {
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                            events.take(3).forEach { event ->
-                                Column(
+            if (events.isNotEmpty()) {
+                item(key = "upcoming") {
+                    Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp)) {
+                        SectionMicro("Upcoming")
+                        Spacer(Modifier.height(8.dp))
+                        Column(
+                            Modifier
+                                .fillMaxWidth()
+                                .flat(Ink.Surface1, RoundedCornerShape(18.dp), 18.dp)
+                                .padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            events.take(4).forEach { event ->
+                                Row(
                                     Modifier
-                                        .weight(1f)
+                                        .fillMaxWidth()
                                         .pressable(
                                             onClick = { event.articleId?.let(onOpenArticle) },
-                                            pressedScale = 0.97f,
+                                            pressedScale = 0.985f,
                                         ),
-                                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 ) {
-                                    Row(verticalAlignment = Alignment.Bottom) {
-                                        Text(Fmt.dayNumber(event.epochDay), style = StockerText.DayNumber)
-                                        Spacer(Modifier.width(6.dp))
-                                        Text(Fmt.monthShort(event.epochDay), style = StockerText.Month, modifier = Modifier.padding(bottom = 6.dp))
+                                    Column(Modifier.width(38.dp)) {
+                                        Text(
+                                            Fmt.dayNumber(event.epochDay),
+                                            style = Type.DataLarge.copy(fontSize = 18.sp),
+                                        )
+                                        Text(
+                                            Fmt.monthShort(event.epochDay),
+                                            style = Type.MicroData.copy(fontSize = 11.5.sp),
+                                        )
                                     }
-                                    Text(event.label, style = StockerText.BodyStrong)
+                                    Column(Modifier.weight(1f)) {
+                                        Text(
+                                            event.label,
+                                            style = Type.BodyTight.copy(color = Ink.TextPrimary),
+                                            maxLines = 2,
+                                        )
+                                        Text(Fmt.daysUntil(event.epochDay), style = Type.MicroData.copy(fontSize = 11.5.sp))
+                                    }
                                 }
                             }
                         }
@@ -214,46 +177,161 @@ fun StockDetailScreen(
             }
 
             item(key = "news-header") {
-                Column(
-                    sideInset.fillMaxWidth().padding(top = 26.dp, bottom = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                Row(
+                    Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom,
                 ) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        SectionLabel("NEWS")
-                        Text("${news.size} stories · 7 days", style = StockerText.Meta)
-                    }
-                    UnderlineTabs(
-                        labels = listOf("Newest", "Top"),
-                        selectedIndex = sortIndex,
-                        onSelect = { sortIndex = it },
-                    )
+                    SectionMicro("News")
+                    Text("${news.size} stories", style = Type.MicroData.copy(fontSize = 11.5.sp))
                 }
             }
-            items(news.take(60), key = { it.article.cluster + it.article.id }) { item ->
-                NewsRow(
-                    item = item,
-                    onClick = { onOpenArticle(item.article.id) },
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+            item(key = "news-sort") {
+                SegmentedControl(
+                    labels = listOf("NEWEST", "TOP"),
+                    selectedIndex = sortIndex,
+                    onSelect = { sortIndex = it },
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
                 )
             }
+            items(news.take(settings.newsPerCompany), key = { it.article.cluster + it.article.id }) { item ->
+                NewsRow(item = item, onClick = { onOpenArticle(item.article.id) })
+            }
+
             item(key = "remove") {
-                Column(sideInset.fillMaxWidth().padding(top = 28.dp)) {
-                    TextAction(
-                        label = if (confirmRemove) "Tap again to remove ${stock.ticker}" else "Remove from watchlist",
-                        color = if (confirmRemove) Obsidian.Negative else Obsidian.TextSubtle,
-                        onClick = {
-                            if (confirmRemove) {
-                                scope.launch {
-                                    store.remove(stock.ticker)
-                                    onRemoved()
-                                }
-                            } else {
-                                confirmRemove = true
-                            }
-                        },
+                Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 20.dp)) {
+                    Text(
+                        if (confirmRemove) "Tap again to remove ${stock.ticker}" else "Remove from watchlist",
+                        style = Type.BodyStrong.copy(
+                            color = if (confirmRemove) Ink.DownText else Ink.TextMuted,
+                        ),
+                        modifier = Modifier
+                            .pressable(
+                                onClick = {
+                                    if (confirmRemove) {
+                                        scope.launch {
+                                            store.remove(stock.ticker)
+                                            onRemoved()
+                                        }
+                                    } else {
+                                        confirmRemove = true
+                                    }
+                                },
+                                pressedScale = 0.97f,
+                            )
+                            .padding(vertical = 10.dp),
                     )
                 }
             }
         }
     }
 }
+
+@Composable
+private fun PriceHeader(
+    stock: WatchStock,
+    quote: Quote?,
+    series: RangeSeries?,
+    shownPrice: Double,
+    hasPrice: Boolean,
+    rangeIndex: Int,
+    onRange: (Int) -> Unit,
+) {
+    val settings = LocalSettings.current
+    Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp)) {
+        Text(stock.name, style = Type.Caption)
+        Spacer(Modifier.height(6.dp))
+        if (!hasPrice) {
+            Text("News only for US stocks", style = Type.Meta2())
+            return@Column
+        }
+        val direction = directionOf(series?.changePct ?: quote?.changePct)
+        Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(
+                if (quote != null) Fmt.price(shownPrice) else "—",
+                style = Type.DataLarge.copy(fontSize = 34.sp, letterSpacing = (-0.8).sp),
+            )
+            if (quote != null) {
+                Row(
+                    Modifier.padding(bottom = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                ) {
+                    DirectionGlyph(direction, size = 7.dp)
+                    ChangeText(quote.changePct, style = Type.DataSmall, fractionDigits = 2)
+                }
+            }
+        }
+        if (series != null && series.points.size >= 2) {
+            Spacer(Modifier.height(4.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
+                val arrow = if (series.changePct >= 0) "▲" else "▼"
+                Text(
+                    "$arrow ${Fmt.number(kotlin.math.abs(series.changeAbs), 2)} (${Fmt.pct(series.changePct, 2)})",
+                    style = Type.MicroData.copy(fontSize = 13.sp, color = direction.textColor2()),
+                )
+                Text(series.caption, style = Type.MicroData.copy(fontSize = 11.5.sp))
+            }
+            Spacer(Modifier.height(10.dp))
+            PriceChart(
+                points = series.points.mapIndexed { i, v ->
+                    Point("2026-01-${(i % 28 + 1).toString().padStart(2, '0')}", v.toDouble())
+                },
+                direction = direction,
+                height = 150.dp,
+                showFill = settings.chartFill,
+                showGlow = settings.chartGlow,
+            )
+        }
+        Spacer(Modifier.height(10.dp))
+        SegmentedControl(
+            labels = StockerStore.ranges.map { it.label },
+            selectedIndex = rangeIndex,
+            onSelect = onRange,
+        )
+    }
+}
+
+@Composable
+private fun TonePanel(counts: com.dotpmm.stocker.domain.model.ToneCounts, running: Boolean, onAiSummary: () -> Unit) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp)) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .flat(Ink.Surface1, RoundedCornerShape(18.dp), 18.dp)
+                .padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                SectionMicro("News tone · last 3 days")
+                Text("${counts.total} stories", style = Type.MicroData.copy(fontSize = 11.5.sp))
+            }
+            if (counts.total > 0) {
+                ToneBar(counts.positive, counts.neutral, counts.negative)
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("${counts.positive} positive", style = Type.MicroData.copy(fontSize = 11.5.sp, color = Ink.UpText))
+                    Text("${counts.neutral} neutral", style = Type.MicroData.copy(fontSize = 11.5.sp))
+                    Text("${counts.negative} negative", style = Type.MicroData.copy(fontSize = 11.5.sp, color = Ink.DownText))
+                }
+            } else {
+                Text(
+                    if (running) "Gathering news…" else "No stories in the last 3 days. Try refreshing.",
+                    style = Type.Caption,
+                )
+            }
+            ActionPill(label = "AI summary", onClick = onAiSummary, leading = StockerIcons.Spark)
+            Text(
+                "Uses your Gemini key · Not financial advice",
+                style = Type.MicroData.copy(fontSize = 11.5.sp),
+            )
+        }
+    }
+}
+
+private fun Direction.textColor2() = when (this) {
+    Direction.Up -> Ink.UpText
+    Direction.Down -> Ink.DownText
+    Direction.Flat -> Ink.TextSecondary
+}
+
+private fun Type.Meta2() = Type.Caption

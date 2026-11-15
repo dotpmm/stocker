@@ -12,7 +12,12 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-class HttpResponse(val code: Int, val body: String, val finalUrl: String) {
+class HttpResponse(
+    val code: Int,
+    val body: String,
+    val finalUrl: String,
+    val headers: Map<String, String> = emptyMap(),
+) {
     val ok: Boolean get() = code in 200..299
 }
 
@@ -81,7 +86,10 @@ object Http {
                 val code = conn.responseCode
                 val stream: InputStream? = if (code in 200..299) conn.inputStream else conn.errorStream
                 val text = stream?.use { readLimited(it, maxBytes, charsetOf(conn.contentType)) } ?: ""
-                HttpResponse(code, text, conn.url.toString())
+                val responseHeaders = conn.headerFields
+                    .filterKeys { it != null }
+                    .mapValues { (_, values) -> values.firstOrNull().orEmpty() }
+                HttpResponse(code, text, conn.url.toString(), responseHeaders)
             } finally {
                 conn.disconnect()
             }

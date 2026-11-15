@@ -3,15 +3,18 @@ package com.dotpmm.stocker.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
@@ -27,8 +30,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.dotpmm.stocker.StockerApp
 import com.dotpmm.stocker.data.Popular
 import com.dotpmm.stocker.data.net.Yahoo
@@ -36,15 +41,22 @@ import com.dotpmm.stocker.domain.model.Market
 import com.dotpmm.stocker.domain.model.WatchStock
 import com.dotpmm.stocker.ui.components.pressable
 import com.dotpmm.stocker.ui.icons.StockerIcons
-import com.dotpmm.stocker.ui.theme.Obsidian
-import com.dotpmm.stocker.ui.theme.StockerText
+import com.dotpmm.stocker.ui.theme.Ink
+import com.dotpmm.stocker.ui.theme.LocalSettings
+import com.dotpmm.stocker.ui.theme.Type
+import com.dotpmm.stocker.ui.theme.flat
+import com.dotpmm.stocker.ui.theme.metal
 import kotlinx.coroutines.delay
 import kotlin.coroutines.cancellation.CancellationException
 
-/** Search by company name or ticker. Built-in suggestions work offline; Yahoo search finds the rest. */
+/**
+ * Add a stock by name or ticker. Built-in suggestions work offline; Yahoo search finds the rest
+ * when live search is enabled in settings.
+ */
 @Composable
 fun AddStockScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val store = StockerApp.instance.store
+    val settings = LocalSettings.current
     val watchlist by store.watchlist.collectAsState()
     var query by rememberSaveable { mutableStateOf("") }
     var results by remember { mutableStateOf<List<WatchStock>>(emptyList()) }
@@ -53,15 +65,11 @@ fun AddStockScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val focus = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
-        delay(150)
-        try {
-            focus.requestFocus()
-        } catch (e: Exception) {
-            // The field may not be attached yet; the user can tap it.
-        }
+        delay(180)
+        runCatching { focus.requestFocus() }
     }
 
-    LaunchedEffect(query) {
+    LaunchedEffect(query, settings.liveSearch) {
         notice = null
         val q = query.trim()
         if (q.length < 2) {
@@ -72,16 +80,20 @@ fun AddStockScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         searching = true
         delay(350)
         val local = Popular.search(q)
-        val remote = try {
-            Yahoo.search(q).map { hit ->
-                val known = Popular.all.firstOrNull { it.ticker == hit.ticker && it.market == hit.market }
-                if (known != null) hit.copy(aliases = known.aliases) else hit
-            }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            notice = "Online search is unavailable. Showing built-in suggestions."
+        val remote = if (!settings.liveSearch) {
             emptyList()
+        } else {
+            try {
+                Yahoo.search(q).map { hit ->
+                    val known = Popular.all.firstOrNull { it.ticker == hit.ticker && it.market == hit.market }
+                    if (known != null) hit.copy(aliases = known.aliases) else hit
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                notice = "Online search is unavailable. Showing built-in suggestions."
+                emptyList()
+            }
         }
         results = (remote + local).distinctBy { it.ticker + it.market.name }
         searching = false
@@ -89,46 +101,61 @@ fun AddStockScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
 
     Column(modifier.fillMaxSize().imePadding()) {
         Row(
-            Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .padding(horizontal = 8.dp),
+            Modifier.fillMaxWidth().padding(start = 8.dp, end = 20.dp, top = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TopIconButton(StockerIcons.Back, "Back", onBack)
-            Text("ADD STOCK", style = StockerText.SectionLabel, modifier = Modifier.padding(start = 8.dp))
+            IconTap(StockerIcons.Back, "Back", onBack)
+            Spacer(Modifier.width(8.dp))
+            Text("ADD A STOCK", style = Type.Micro.copy(letterSpacing = 1.6.sp))
         }
-        UnderlineField(
-            value = query,
-            onValueChange = { query = it },
-            placeholder = "Search company or ticker",
-            modifier = Modifier.padding(horizontal = 20.dp),
-            fieldModifier = Modifier.focusRequester(focus),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = {}),
-        )
-        val showing: List<WatchStock>
-        val heading: String
-        if (query.trim().length < 2) {
-            showing = Popular.all
-            heading = "POPULAR"
-        } else {
-            showing = results
-            heading = if (searching) "SEARCHING…" else "RESULTS"
+
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 12.dp)
+                .flat(Ink.Surface1, RoundedCornerShape(999.dp), 999.dp)
+                .padding(horizontal = 16.dp, vertical = 13.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("⌕", style = Type.Data.copy(color = Ink.TextMuted))
+            Spacer(Modifier.width(10.dp))
+            Column(Modifier.weight(1f)) {
+                if (query.isEmpty()) {
+                    Text("Search company or ticker", style = Type.BodyTight.copy(color = Ink.TextMuted))
+                }
+                BasicTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    singleLine = true,
+                    textStyle = Type.BodyTight.copy(color = Ink.TextPrimary),
+                    cursorBrush = SolidColor(Ink.TextPrimary),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(onSearch = {}),
+                    modifier = Modifier.fillMaxWidth().focusRequester(focus),
+                )
+            }
         }
+
+        val showing = if (query.trim().length < 2) Popular.all else results
+        val heading = when {
+            query.trim().length < 2 -> "Popular"
+            searching -> "Searching…"
+            else -> "Results"
+        }
+
         LazyColumn(Modifier.weight(1f).navigationBarsPadding()) {
             item(key = "heading") {
                 Text(
-                    heading,
-                    style = StockerText.SectionLabel,
-                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 6.dp),
+                    heading.uppercase(),
+                    style = Type.Micro.copy(fontSize = 13.sp),
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
                 )
             }
-            if (notice != null) {
+            notice?.let { text ->
                 item(key = "notice") {
                     Text(
-                        notice ?: "",
-                        style = StockerText.Caption.copy(color = Obsidian.TextSubtle),
+                        text,
+                        style = Type.Caption,
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
                     )
                 }
@@ -137,7 +164,7 @@ fun AddStockScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 item(key = "none") {
                     Text(
                         "No match. Try the company name or the NSE ticker.",
-                        style = StockerText.Body,
+                        style = Type.Caption,
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
                     )
                 }
@@ -147,23 +174,32 @@ fun AddStockScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 64.dp)
-                        .pressable(onClick = { if (!added) store.add(stock) }, pressedScale = 0.98f, pressedAlpha = 0.6f)
-                        .padding(horizontal = 20.dp),
+                        .padding(horizontal = 20.dp, vertical = 4.dp)
+                        .flat(Ink.Surface1, RoundedCornerShape(14.dp), 14.dp)
+                        .pressable(
+                            onClick = { if (!added) store.add(stock) },
+                            pressedScale = 0.985f,
+                        )
+                        .heightIn(min = 56.dp)
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                        Text(stock.ticker, style = StockerText.Ticker)
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(stock.ticker, style = Type.Ticker)
                         Text(
-                            "${stock.name} · ${stock.exchange}" + if (stock.market == Market.US) " · news only" else "",
-                            style = StockerText.Caption,
+                            "${stock.name} · ${stock.exchange}" +
+                                if (stock.market == Market.US) " · news only" else "",
+                            style = Type.MicroData.copy(fontSize = 11.5.sp),
                             maxLines = 1,
                         )
                     }
                     Text(
-                        if (added) "Added" else "Add",
-                        style = StockerText.BodyStrong.copy(color = if (added) Obsidian.TextSubtle else Obsidian.Accent),
+                        if (added) "ADDED" else "ADD",
+                        style = Type.MicroData.copy(
+                            fontSize = 13.sp,
+                            color = if (added) Ink.TextMuted else Ink.TextPrimary,
+                        ),
                     )
                 }
             }

@@ -16,6 +16,8 @@ private fun variable(resId: Int, weight: Int) = Font(
     variationSettings = FontVariation.Settings(FontVariation.weight(weight)),
 )
 
+private fun mono(resId: Int, weight: FontWeight) = Font(resId = resId, weight = weight)
+
 val InterFamily = FontFamily(
     variable(R.font.inter, 400),
     variable(R.font.inter, 500),
@@ -28,97 +30,115 @@ val DisplayFamily = FontFamily(
     variable(R.font.space_grotesk, 600),
 )
 
-/** Text styles taken from the approved Obsidian mockups. Numerals are tabular. */
-object StockerText {
+/** IBM Plex Mono — tickers, prices, tables. Tabular by construction. */
+val MonoFamily = FontFamily(
+    mono(R.font.ibm_plex_mono_regular, FontWeight.Normal),
+    mono(R.font.ibm_plex_mono_medium, FontWeight.Medium),
+    mono(R.font.ibm_plex_mono_semibold, FontWeight.SemiBold),
+)
+
+/** Typography scale from design.md §7. Prices never render in a proportional face. */
+object Type {
     private const val TABULAR = "tnum"
 
-    val ScreenTitle = TextStyle(
+    /** Hero index numeral: mono, 500, vertical white gradient applied by the caller. */
+    val Hero = TextStyle(
+        fontFamily = MonoFamily, fontWeight = FontWeight.Medium,
+        fontSize = 56.sp, lineHeight = 60.sp, letterSpacing = (-1.6).sp,
+        fontFeatureSettings = TABULAR, color = Ink.TextPrimary,
+    )
+
+    /** Section titles — display face, sentence case, tight tracking. */
+    val Section = TextStyle(
         fontFamily = DisplayFamily, fontWeight = FontWeight.SemiBold,
-        fontSize = 32.sp, lineHeight = 38.sp, letterSpacing = (-0.64).sp, color = Obsidian.Text,
+        fontSize = 30.sp, lineHeight = 36.sp, letterSpacing = (-0.6).sp, color = Ink.TextPrimary,
     )
-    val Price = TextStyle(
+
+    val PanelTitle = TextStyle(
         fontFamily = DisplayFamily, fontWeight = FontWeight.SemiBold,
-        fontSize = 46.sp, lineHeight = 50.sp, letterSpacing = (-0.92).sp,
-        fontFeatureSettings = TABULAR, color = Obsidian.Text,
+        fontSize = 22.sp, lineHeight = 28.sp, letterSpacing = (-0.3).sp, color = Ink.TextPrimary,
     )
-    val RowPrice = TextStyle(
+
+    /** Company name in a deep-dive header. */
+    val Header = TextStyle(
         fontFamily = DisplayFamily, fontWeight = FontWeight.SemiBold,
-        fontSize = 17.sp, fontFeatureSettings = TABULAR, color = Obsidian.Text,
+        fontSize = 27.sp, lineHeight = 33.sp, letterSpacing = (-0.52).sp, color = Ink.TextPrimary,
     )
-    val IndexValue = TextStyle(
-        fontFamily = DisplayFamily, fontWeight = FontWeight.SemiBold,
-        fontSize = 20.sp, fontFeatureSettings = TABULAR, color = Obsidian.Text,
-    )
-    val DayNumber = TextStyle(
-        fontFamily = DisplayFamily, fontWeight = FontWeight.SemiBold,
-        fontSize = 34.sp, lineHeight = 36.sp, letterSpacing = (-0.68).sp,
-        fontFeatureSettings = TABULAR, color = Obsidian.Text,
-    )
-    val TabLarge = TextStyle(
-        fontFamily = DisplayFamily, fontWeight = FontWeight.SemiBold,
-        fontSize = 22.sp, letterSpacing = (-0.22).sp, color = Obsidian.Text,
-    )
-    val TabSmall = TextStyle(
-        fontFamily = InterFamily, fontWeight = FontWeight.SemiBold,
-        fontSize = 14.sp, letterSpacing = 0.28.sp, color = Obsidian.Text,
-    )
+
+    /** Tickers: uppercase mono, 600, 0.04em tracking. */
     val Ticker = TextStyle(
-        fontFamily = InterFamily, fontWeight = FontWeight.SemiBold,
-        fontSize = 16.sp, color = Obsidian.Text,
+        fontFamily = MonoFamily, fontWeight = FontWeight.SemiBold,
+        fontSize = 14.sp, letterSpacing = 0.4.sp, color = Ink.TextPrimary,
     )
-    val Headline = TextStyle(
-        fontFamily = InterFamily, fontWeight = FontWeight.SemiBold,
-        fontSize = 16.sp, lineHeight = 22.sp, color = Obsidian.Text,
+
+    val TickerSmall = TextStyle(
+        fontFamily = MonoFamily, fontWeight = FontWeight.Medium,
+        fontSize = 12.sp, letterSpacing = 0.36.sp, color = Ink.TextSecondary,
     )
-    val Change = TextStyle(
-        fontFamily = InterFamily, fontWeight = FontWeight.SemiBold,
-        fontSize = 15.sp, fontFeatureSettings = TABULAR,
+
+    /** Prices and percentages — mono + tabular so digits never jitter mid-animation. */
+    val Data = TextStyle(
+        fontFamily = MonoFamily, fontWeight = FontWeight.Medium,
+        fontSize = 15.sp, letterSpacing = (-0.15).sp,
+        fontFeatureSettings = TABULAR, color = Ink.TextPrimary,
     )
-    val ChangeSmall = TextStyle(
-        fontFamily = InterFamily, fontWeight = FontWeight.SemiBold,
-        fontSize = 13.sp, fontFeatureSettings = TABULAR,
+
+    val DataSmall = TextStyle(
+        fontFamily = MonoFamily, fontWeight = FontWeight.Medium,
+        fontSize = 13.sp, fontFeatureSettings = TABULAR, color = Ink.TextSecondary,
     )
+
+    val DataLarge = TextStyle(
+        fontFamily = MonoFamily, fontWeight = FontWeight.Medium,
+        fontSize = 24.sp, letterSpacing = (-0.44).sp,
+        fontFeatureSettings = TABULAR, color = Ink.TextPrimary,
+    )
+
     val Body = TextStyle(
         fontFamily = InterFamily, fontWeight = FontWeight.Normal,
-        fontSize = 14.sp, color = Obsidian.TextMuted,
+        fontSize = 16.sp, lineHeight = 26.sp, color = Ink.TextSecondary,
     )
+
+    val BodyTight = TextStyle(
+        fontFamily = InterFamily, fontWeight = FontWeight.Normal,
+        fontSize = 15.sp, lineHeight = 23.sp, color = Ink.TextSecondary,
+    )
+
     val BodyStrong = TextStyle(
-        fontFamily = InterFamily, fontWeight = FontWeight.Normal,
-        fontSize = 14.sp, color = Obsidian.TextSecondary,
+        fontFamily = InterFamily, fontWeight = FontWeight.Medium,
+        fontSize = 14.sp, lineHeight = 21.sp, color = Ink.TextPrimary,
     )
-    val Meta = TextStyle(
-        fontFamily = InterFamily, fontWeight = FontWeight.Normal,
-        fontSize = 13.sp, fontFeatureSettings = TABULAR, color = Obsidian.TextMuted,
+
+    /** Uppercase micro-labels at 0.6875rem — the monochrome texture of the app. */
+    val Micro = TextStyle(
+        fontFamily = InterFamily, fontWeight = FontWeight.Medium,
+        fontSize = 13.sp, letterSpacing = 0.9.sp, color = Ink.TextMuted,
     )
+
+    val MicroData = TextStyle(
+        fontFamily = MonoFamily, fontWeight = FontWeight.Medium,
+        fontSize = 12.5.sp, letterSpacing = 0.6.sp,
+        fontFeatureSettings = TABULAR, color = Ink.TextMuted,
+    )
+
     val Caption = TextStyle(
         fontFamily = InterFamily, fontWeight = FontWeight.Normal,
-        fontSize = 12.sp, color = Obsidian.TextMuted,
+        fontSize = 14.sp, lineHeight = 21.sp, color = Ink.TextMuted,
     )
-    val SectionLabel = TextStyle(
-        fontFamily = InterFamily, fontWeight = FontWeight.Medium,
-        fontSize = 12.sp, letterSpacing = 1.2.sp, color = Obsidian.TextMuted,
-    )
-    val Month = TextStyle(
-        fontFamily = InterFamily, fontWeight = FontWeight.SemiBold,
-        fontSize = 12.sp, letterSpacing = 1.44.sp, color = Obsidian.Accent,
-    )
-    val ReaderTitle = TextStyle(
-        fontFamily = DisplayFamily, fontWeight = FontWeight.SemiBold,
-        fontSize = 26.sp, lineHeight = 33.sp, letterSpacing = (-0.26).sp, color = Obsidian.Text,
-    )
-    val ReaderBody = TextStyle(
-        fontFamily = InterFamily, fontWeight = FontWeight.Normal,
-        fontSize = 17.sp, lineHeight = 27.sp, color = Obsidian.TextSecondary,
-    )
-    val Point = TextStyle(
-        fontFamily = InterFamily, fontWeight = FontWeight.Normal,
-        fontSize = 15.sp, lineHeight = 22.sp, color = Obsidian.Text,
-    )
+
     val NavLabel = TextStyle(
-        fontFamily = InterFamily, fontWeight = FontWeight.Medium, fontSize = 11.sp,
+        fontFamily = InterFamily, fontWeight = FontWeight.Medium,
+        fontSize = 11.sp, letterSpacing = 0.2.sp,
     )
-    val Action = TextStyle(
-        fontFamily = InterFamily, fontWeight = FontWeight.SemiBold,
-        fontSize = 15.sp, letterSpacing = 0.15.sp, color = androidx.compose.ui.graphics.Color.Black,
+
+    /** Slightly larger body copy for explanatory text where Caption read too small. */
+    val Note = TextStyle(
+        fontFamily = InterFamily, fontWeight = FontWeight.Normal,
+        fontSize = 14.sp, lineHeight = 21.sp, color = Ink.TextSecondary,
+    )
+
+    val ButtonLabel = TextStyle(
+        fontFamily = DisplayFamily, fontWeight = FontWeight.SemiBold,
+        fontSize = 16.sp, letterSpacing = 0.1.sp, color = Ink.TextPrimary,
     )
 }
