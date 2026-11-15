@@ -1,0 +1,24 @@
+Stocker - Proprietary License
+Copyright (c) 2026 Prajwal (GitHub: dotpmm). All rights reserved.
+
+This repository is source-available for viewing and evaluation. It is NOT open-source software.
+
+1. Permitted: you may read the source code, build it for your own personal, non-commercial use, and install
+   official release builds on your own devices.
+
+2. Not permitted without prior written permission from the copyright holder: copying, modifying, merging,
+   publishing, distributing, sublicensing or selling the software or any substantial part of it, offering it as a
+   service, or using it in a commercial product.
+
+3. Contributions: by submitting a pull request or other contribution you agree to the terms in CONTRIBUTING.md.
+
+4. Third-party components keep their own licences:
+   - Inter and Space Grotesk fonts: SIL Open Font License 1.1 (see docs/third-party/).
+   - AndroidX, Jetpack Compose and Kotlin: Apache License 2.0.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+OR ITS USE.
+
+Stocker provides information only. Nothing in the app is financial advice.
