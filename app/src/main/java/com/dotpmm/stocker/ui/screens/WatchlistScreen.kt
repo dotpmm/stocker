@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -22,10 +23,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.dotpmm.stocker.domain.model.MarketIndex
+import com.dotpmm.stocker.StockerApp
 import com.dotpmm.stocker.domain.model.Market
-import com.dotpmm.stocker.domain.model.Stock
+import com.dotpmm.stocker.domain.model.MarketIndex
+import com.dotpmm.stocker.domain.model.StockRow
 import com.dotpmm.stocker.ui.Fmt
+import com.dotpmm.stocker.ui.components.PrimaryActionBar
 import com.dotpmm.stocker.ui.components.Sparkline
 import com.dotpmm.stocker.ui.components.ToneMarker
 import com.dotpmm.stocker.ui.components.UnderlineTabs
@@ -35,11 +38,40 @@ import com.dotpmm.stocker.ui.theme.Obsidian
 import com.dotpmm.stocker.ui.theme.StockerText
 
 @Composable
+fun WatchlistTab(
+    onOpenStock: (String) -> Unit,
+    onAddStock: () -> Unit,
+    contentPadding: PaddingValues,
+) {
+    val store = StockerApp.instance.store
+    val rows by rememberQuery(emptyList<StockRow>()) { store.watchRows() }
+    val indices by rememberQuery(emptyList<MarketIndex>()) { store.indices() }
+    val refresh by store.refresh.collectAsState()
+    val lastRefresh by store.lastRefresh.collectAsState()
+    val watchlist by store.watchlist.collectAsState()
+
+    val status = if (refresh.running) "Refreshing · ${refresh.message}" else Fmt.updated(lastRefresh)
+    WatchlistScreen(
+        rows = if (watchlist.isEmpty()) emptyList() else rows,
+        indices = indices,
+        status = status,
+        refreshing = refresh.running,
+        error = refresh.error,
+        onOpenStock = onOpenStock,
+        onRefresh = { store.launchRefresh() },
+        onAddStock = onAddStock,
+        contentPadding = contentPadding,
+    )
+}
+
+@Composable
 fun WatchlistScreen(
-    stocks: List<Stock>,
+    rows: List<StockRow>,
     indices: List<MarketIndex>,
-    updatedLabel: String,
-    onOpenStock: (Stock) -> Unit,
+    status: String,
+    refreshing: Boolean,
+    error: String?,
+    onOpenStock: (String) -> Unit,
     onRefresh: () -> Unit,
     onAddStock: () -> Unit,
     contentPadding: PaddingValues,
@@ -47,42 +79,45 @@ fun WatchlistScreen(
 ) {
     var marketIndex by rememberSaveable { mutableIntStateOf(0) }
     val market = if (marketIndex == 0) Market.India else Market.US
-    val visible = stocks.filter { it.market == market }
+    val visible = rows.filter { it.stock.market == market }
 
     LazyColumn(modifier.fillMaxSize(), contentPadding = contentPadding) {
         item(key = "header") {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(start = 20.dp, end = 12.dp, top = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top,
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Watchlist", style = StockerText.ScreenTitle)
-                    Text(updatedLabel, style = StockerText.Meta)
-                }
-                Row {
-                    TopIconButton(StockerIcons.Refresh, "Refresh now", onRefresh)
+            ScreenHeader(
+                title = "Watchlist",
+                subtitle = status,
+                trailing = {
+                    TopIconButton(StockerIcons.Refresh, "Refresh now", onRefresh, spinning = refreshing)
                     TopIconButton(StockerIcons.Add, "Add stock", onAddStock)
-                }
+                },
+            )
+        }
+        if (error != null) {
+            item(key = "error") {
+                Text(
+                    error,
+                    style = StockerText.Caption.copy(color = Obsidian.Negative),
+                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 6.dp),
+                )
             }
         }
-        item(key = "indices") {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(start = 20.dp, end = 20.dp, top = 22.dp),
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
-            ) {
-                indices.forEach { index ->
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(index.name, style = StockerText.SectionLabel)
-                        Text(Fmt.plain(index.value), style = StockerText.IndexValue)
-                        Text(
-                            Fmt.arrowPercent(index.changePct),
-                            style = StockerText.ChangeSmall.copy(color = Fmt.changeColor(index.changePct)),
-                        )
+        if (indices.isNotEmpty()) {
+            item(key = "indices") {
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(start = 20.dp, end = 20.dp, top = 22.dp),
+                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+                ) {
+                    indices.forEach { index ->
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(index.name, style = StockerText.SectionLabel)
+                            Text(Fmt.plain(index.value), style = StockerText.IndexValue)
+                            Text(
+                                Fmt.arrowPercent(index.changePct),
+                                style = StockerText.ChangeSmall.copy(color = Fmt.changeColor(index.changePct)),
+                            )
+                        }
                     }
                 }
             }
@@ -96,45 +131,79 @@ fun WatchlistScreen(
                 modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 8.dp),
             )
         }
-        items(visible, key = { it.ticker }) { stock ->
-            StockRow(stock = stock, onClick = if (stock.price != null) ({ onOpenStock(stock) }) else null)
+        if (visible.isEmpty()) {
+            item(key = "empty") {
+                Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Text(
+                        if (rows.isEmpty()) "Your watchlist is empty" else "Nothing here yet",
+                        style = StockerText.TabLarge,
+                    )
+                    Text(
+                        if (market == Market.India) {
+                            "Add NSE or BSE companies and Stocker will gather their news, tone and upcoming events."
+                        } else {
+                            "Add US companies to follow their news. Prices are shown for Indian stocks only."
+                        },
+                        style = StockerText.Body,
+                    )
+                    PrimaryActionBar(
+                        label = "Add stocks",
+                        leadingIcon = StockerIcons.Add,
+                        trailingIcon = StockerIcons.Arrow,
+                        onClick = onAddStock,
+                    )
+                }
+            }
+        }
+        items(visible, key = { it.stock.ticker }) { row ->
+            StockRowItem(row = row, onClick = { onOpenStock(row.stock.ticker) })
         }
     }
 }
 
 @Composable
-private fun StockRow(stock: Stock, onClick: (() -> Unit)?) {
-    val base = Modifier
-        .fillMaxWidth()
-        .heightIn(min = 76.dp)
+private fun StockRowItem(row: StockRow, onClick: () -> Unit) {
+    val stock = row.stock
+    val quote = row.quote
     Row(
-        modifier = (if (onClick != null) base.pressable(onClick, pressedScale = 0.98f, pressedAlpha = 0.55f) else base)
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 76.dp)
+            .pressable(onClick, pressedScale = 0.98f, pressedAlpha = 0.55f)
             .padding(horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Text(stock.ticker, style = StockerText.Ticker)
-            if (stock.price != null) ToneLine(stock) else Text(stock.name, style = StockerText.Caption)
+            if (stock.market == Market.India) ToneLine(row) else Text(stock.name, style = StockerText.Caption, maxLines = 1)
         }
-        if (stock.price != null && stock.changePct != null) {
-            val color = Fmt.changeColor(stock.changePct)
-            Sparkline(stock.trend, color, Modifier.size(width = 64.dp, height = 24.dp))
-            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                Text(Fmt.price(stock.price), style = StockerText.RowPrice)
-                Text(Fmt.arrowPercent(stock.changePct), style = StockerText.ChangeSmall.copy(color = color))
+        if (stock.market == Market.India) {
+            if (quote != null) {
+                val color = Fmt.changeColor(quote.changePct)
+                Sparkline(quote.trend, color, Modifier.size(width = 64.dp, height = 24.dp))
+                Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(Fmt.price(quote.price), style = StockerText.RowPrice)
+                    Text(Fmt.arrowPercent(quote.changePct), style = StockerText.ChangeSmall.copy(color = color))
+                }
+            } else {
+                Text("—", style = StockerText.RowPrice.copy(color = Obsidian.TextSubtle))
             }
         } else {
-            ToneLine(stock)
+            ToneLine(row)
         }
     }
 }
 
 @Composable
-private fun ToneLine(stock: Stock) {
+private fun ToneLine(row: StockRow) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        ToneMarker(stock.tone)
-        Spacer(Modifier.width(6.dp))
-        Text("${stock.articleCount} articles · ${stock.tone.name}", style = StockerText.Caption)
+        if (row.articleCount == 0) {
+            Text("No news yet", style = StockerText.Caption)
+        } else {
+            ToneMarker(row.tone)
+            Spacer(Modifier.width(6.dp))
+            Text("${row.articleCount} stories · ${row.tone.name}", style = StockerText.Caption)
+        }
     }
 }

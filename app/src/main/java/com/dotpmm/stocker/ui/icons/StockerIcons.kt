@@ -19,6 +19,8 @@ object StockerIcons {
     val News = stroke("News", "M5 4h12v16H5zM9 8h4M9 12h4")
     val Events = stroke("Events", "M5 6h14v14H5zM5 10h14M9 3v4M15 3v4")
     val Settings = stroke("Settings", "M4 8h10M18 8h2M4 16h2M10 16h10")
+    val External = stroke("External", "M14 4h6v6M20 4l-9 9M18 14v5H5V6h5", 1.6f)
+    val Close = stroke("Close", "M6 6l12 12M18 6L6 18", 1.6f)
 
     private fun stroke(name: String, pathData: String, width: Float = 1.7f): ImageVector =
         ImageVector.Builder(

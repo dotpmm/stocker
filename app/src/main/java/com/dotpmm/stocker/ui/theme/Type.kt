@@ -102,6 +102,18 @@ object StockerText {
         fontFamily = InterFamily, fontWeight = FontWeight.SemiBold,
         fontSize = 12.sp, letterSpacing = 1.44.sp, color = Obsidian.Accent,
     )
+    val ReaderTitle = TextStyle(
+        fontFamily = DisplayFamily, fontWeight = FontWeight.SemiBold,
+        fontSize = 26.sp, lineHeight = 33.sp, letterSpacing = (-0.26).sp, color = Obsidian.Text,
+    )
+    val ReaderBody = TextStyle(
+        fontFamily = InterFamily, fontWeight = FontWeight.Normal,
+        fontSize = 17.sp, lineHeight = 27.sp, color = Obsidian.TextSecondary,
+    )
+    val Point = TextStyle(
+        fontFamily = InterFamily, fontWeight = FontWeight.Normal,
+        fontSize = 15.sp, lineHeight = 22.sp, color = Obsidian.Text,
+    )
     val NavLabel = TextStyle(
         fontFamily = InterFamily, fontWeight = FontWeight.Medium, fontSize = 11.sp,
     )
