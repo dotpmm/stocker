@@ -4,6 +4,11 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+// Optional permanent release key, supplied through the environment (see docs/releasing.md).
+val releaseKeystore: java.io.File? = System.getenv("STOCKER_KEYSTORE_FILE")
+    ?.let { file(it) }
+    ?.takeIf { it.exists() }
+
 android {
     namespace = "com.dotpmm.stocker"
     compileSdk = 36
@@ -13,13 +18,26 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 1
-        versionName = "0.1.0"
+        versionName = "1.0.0"
+    }
+
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = releaseKeystore
+                storePassword = System.getenv("STOCKER_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("STOCKER_KEY_ALIAS")
+                keyPassword = System.getenv("STOCKER_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            // Falls back to the debug key when no permanent key is configured (installable, not updatable).
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",

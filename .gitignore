@@ -22,3 +22,8 @@ Thumbs.db
 secrets.properties
 *.env
 .env*
+
+# Local release material (never commit)
+release-keys/
+/release/
+_push.bundle
