@@ -1,6 +1,6 @@
 # Releasing
 
-Releases are built by GitHub Actions when a version tag is pushed. The workflow is `.github/workflows/release.yml`.
+Releases are built by GitHub Actions when a version tag is pushed, or when the Release workflow is run manually (Actions tab > Release > Run workflow, enter the version; the tag is created for you). The workflow is `.github/workflows/release.yml`.
 
 ## Cut a release
 
