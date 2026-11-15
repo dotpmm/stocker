@@ -1,8 +1,6 @@
 package com.dotpmm.stocker.ui.screens
 
 import android.content.ActivityNotFoundException
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -68,7 +66,7 @@ fun ReaderScreen(
     }
 
     fun openOriginal(url: String) {
-        runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+        openWebLink(context, url)
     }
 
     Column(modifier.fillMaxSize()) {

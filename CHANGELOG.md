@@ -32,6 +32,16 @@ Polish pass on the v2.0 surface: legibility, scroll performance, and a lighter m
 - **Metal nav bar toggle**, so the finish can be dropped from the bar independently.
 - Settings rows for swipe, smart start and nav metal.
 
+### Security
+- Links to articles and Google Finance now open only if they are http or https. Article URLs come from third-party
+  feeds, so `intent:`, `file:`, `content:` and `javascript:` links are ignored.
+- The HTTP client refuses any non-http(s) URL, and cleartext traffic is explicitly disabled in the manifest.
+- Yahoo session state (cookie and crumb) is now safely shared between threads, and the Google Finance link encodes the
+  symbol.
+- Removed an AI-tool preferences folder (`.commandcode/`) that had been committed by accident.
+- Reviewed the new code for secrets, new permissions, reflection and dynamic loading, workflow changes and unexpected
+  network hosts; the only hosts are Yahoo Finance, Google (Gemini, Finance, News) and the news feeds.
+
 ### Fixed
 - **Scroll performance.** The film-grain overlay was issuing ~288,000 draw calls per frame; it is
   now a single pre-rendered tiled shader. Charts drop their PathMeasure and dash effect once the

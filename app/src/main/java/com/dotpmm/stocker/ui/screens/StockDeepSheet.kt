@@ -1,7 +1,5 @@
 package com.dotpmm.stocker.ui.screens
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -134,8 +132,8 @@ fun StockDeepSheet(
                     onClose = onClose,
                     onOpenSector = onOpenSector,
                     onGoogleFinance = {
-                        val url = "https://www.google.com/finance/quote/${symbol}:NSE"
-                        runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+                        val encoded = java.net.URLEncoder.encode(symbol, "UTF-8")
+                        openWebLink(context, "https://www.google.com/finance/quote/$encoded:NSE")
                     },
                     onRetry = {
                         scope.launch {

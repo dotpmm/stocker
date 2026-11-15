@@ -5,7 +5,7 @@
 ## Checklist
 
 - [ ] CI passes (`./gradlew assembleDebug`)
-- [ ] Follows the Obsidian design rules in CONTRIBUTING.md (no borders, no pill buttons, 44 dp targets)
+- [ ] Follows the design rules in CONTRIBUTING.md and design.md (reserved metal, 44 dp targets, reduced-motion path)
 - [ ] No secrets, keys or personal data committed
 - [ ] User-visible changes are noted in CHANGELOG.md under "Unreleased"
 - [ ] I agree my contribution is licensed to the maintainer as described in CONTRIBUTING.md

@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/dotpmm/stocker/actions/workflows/android.yml"><img alt="Android CI" src="https://github.com/dotpmm/stocker/actions/workflows/android.yml/badge.svg"></a>
-  <img alt="Version" src="https://img.shields.io/badge/version-2.0.0-9DB8FF">
+  <img alt="Version" src="https://img.shields.io/badge/version-2.1.0-9DB8FF">
   <img alt="Android 8.0+" src="https://img.shields.io/badge/Android-8.0%2B-3DDC97">
   <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-Jetpack%20Compose-7F52FF">
   <img alt="License" src="https://img.shields.io/badge/license-proprietary-555">
@@ -15,12 +15,13 @@
 
 ---
 
-## Status: v2.0, news plus research
+## Status: v2.1, news plus research
 
-v2.0 adds the Coffee-Can macro research surface described in [`FUNCTIONALITY.md`](FUNCTIONALITY.md),
+v2.0 added the Coffee-Can macro research surface described in [`FUNCTIONALITY.md`](FUNCTIONALITY.md),
 rendered in the metal-and-blur language of [`design.md`](design.md). **Everything from v1.5 is still
 here** — the watchlist, the news pipeline, the reader, events and the optional Gemini summary — all
-restyled into the same system.
+restyled into the same system. v2.1 is a polish pass: larger type, a lighter metal treatment and much
+smoother scrolling.
 
 ## What Stocker is
 
@@ -84,7 +85,6 @@ render fully drawn, the ticker stops rolling, and the burst never fires.
 
 **Macro research**
 - [x] NIFTY hero, six sector plates, verdict badges, market-cap-weighted P/E vs 5Y baseline
-- [x] Sector interdependence graph (optional, in Settings)
 - [x] Sector drill-down with persisted filters (Structure / Valuation / Growth & Size)
 - [x] Deep-dive: reality-check gauge, narrative, fundamentals, noise-filter chart, earnings dots
 - [x] Universe-wide search by ticker or company name
@@ -95,7 +95,7 @@ render fully drawn, the ticker stops rolling, and the burst never fires.
 - [x] AMOLED mode that keeps the metal readable
 - [x] Extensive appearance and behaviour settings, all live
 - [x] TTL cache with stale-serve-on-failure
-- [x] 259 unit tests, including reference-parity and render harnesses
+- [x] 267 unit tests, including reference-parity and render harnesses
 - [ ] Light mode (the palette inverts; the direction pair is unchanged)
 - [ ] Home-screen widget for the macro verdicts
 
@@ -116,10 +116,10 @@ reference implementation and pinned by tests in `ReferenceParityTest`.
 git clone https://github.com/dotpmm/stocker.git
 cd stocker
 ./gradlew assembleDebug          # app/build/outputs/apk/debug/app-debug.apk
-./gradlew testDebugUnitTest      # 259 tests
+./gradlew testDebugUnitTest      # 267 tests
 ```
 
-Requires JDK 17+ and the Android SDK (platform 36). Releases are cut by pushing a `v*` tag, see
+Requires JDK 17+ and the Android SDK (platform 36). Releases are built by GitHub Actions, see
 [docs/releasing.md](docs/releasing.md).
 
 ### Verifying without a device
@@ -137,6 +137,17 @@ emulator cannot run. The render harnesses also assert that charts survive degene
 | [Design guide](design.md) | The Monochrome Exchange + Metal Finish system and its hard rules |
 | [Architecture](docs/architecture.md) | Layers, data flow, tech choices |
 | [Building](docs/building.md) / [Releasing](docs/releasing.md) | Build and release process |
+
+## Contributing
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) first, then open an issue or a pull request. Bug reports and news-source
+suggestions are especially welcome.
+
+## Credits
+
+- [@woterr](https://github.com/woterr): Markets tab, sector filters, deep-dive sheet, settings, and the v2 design
+  system (pull request #1)
+- Built with help from Claude (Anthropic)
 
 ## Licence
 

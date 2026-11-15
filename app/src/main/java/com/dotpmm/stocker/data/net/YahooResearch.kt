@@ -18,8 +18,8 @@ object YahooResearch {
     fun nseSymbol(symbol: String): String =
         if (symbol.startsWith("^")) symbol else "$symbol.NS"
 
-    private var crumb: String? = null
-    private var cookie: String? = null
+    @Volatile private var crumb: String? = null
+    @Volatile private var cookie: String? = null
 
     private val browserUa =
         "Mozilla/5.0 (Linux; Android 14; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) " +

@@ -25,7 +25,7 @@ class HttpResponse(
 object Http {
     const val USER_AGENT =
         "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) " +
-            "Chrome/124.0 Mobile Safari/537.36 Stocker/1.5"
+            "Chrome/124.0 Mobile Safari/537.36 Stocker/2.1"
 
     private val locks = ConcurrentHashMap<String, Mutex>()
     private val lastHit = ConcurrentHashMap<String, Long>()
@@ -65,7 +65,9 @@ object Http {
         timeoutMs: Int,
         maxBytes: Int,
     ): HttpResponse {
-        val host = URL(url).host
+        val target = URL(url)
+        require(target.protocol == "https" || target.protocol == "http") { "Unsupported URL scheme" }
+        val host = target.host
         gate(host, gateMs)
         return withContext(Dispatchers.IO) {
             val conn = URL(url).openConnection() as HttpURLConnection

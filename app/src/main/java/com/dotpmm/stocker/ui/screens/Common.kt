@@ -168,3 +168,19 @@ fun <T> rememberQuery(initial: T, vararg keys: Any?, block: suspend () -> T): St
     LaunchedEffect(queryKey) { state.value = block() }
     return state
 }
+
+/**
+ * Opens a web page in the browser. Only http and https links are allowed: article URLs come from
+ * third-party feeds, so any other scheme (intent:, file:, content:, javascript:) is ignored.
+ */
+fun openWebLink(context: android.content.Context, url: String) {
+    val uri = runCatching { android.net.Uri.parse(url.trim()) }.getOrNull() ?: return
+    val scheme = uri.scheme?.lowercase()
+    if ((scheme != "https" && scheme != "http") || uri.host.isNullOrBlank()) return
+    runCatching {
+        context.startActivity(
+            android.content.Intent(android.content.Intent.ACTION_VIEW, uri)
+                .addCategory(android.content.Intent.CATEGORY_BROWSABLE),
+        )
+    }
+}

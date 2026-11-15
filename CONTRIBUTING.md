@@ -26,17 +26,18 @@ news feed. Read the [README](README.md) and [product spec](docs/product-spec.md)
    `chore:`, with an optional scope, for example `feat(ui): add source health screen`.
 5. Open a pull request using the template.
 
-## Design rules (Obsidian)
+## Design rules
 
-The UI language is documented in [docs/design-directions.md](docs/design-directions.md). The short version:
+Since v2.0 the UI follows the Monochrome Exchange + Metal Finish language in [design.md](design.md). The short version:
 
-- Pure black `#000` canvas. **No borders, outlines, cards or dividers.** Use spacing and type for structure.
-- **No pill or rounded buttons.** Selection is plain text with a sliding underline; the primary action is the solid
-  white bar. Corner radii stay at or below 2 dp, except the floating nav bar.
-- Numbers use tabular figures; colour never carries meaning alone (pair with arrows, signs or labels).
-- Every tappable thing uses the shared press feedback and Material-3 emphasized easing from `ui/theme/Motion.kt`.
+- Monochrome first. Colour (sage and clay) appears only to show market direction and always comes with a ▲/▼ glyph.
+- Metal surfaces are reserved for a few important containers (nav bar, hero, primary actions, search, sheet). Everything
+  else is flat.
+- Numbers use tabular figures; colour never carries meaning alone.
+- Interactions use the shared press feedback and motion tokens in `ui/theme/Motion.kt`, and every animation must have a
+  reduced-motion path.
 - Touch targets are at least 44 dp. Text contrast is at least 4.5:1.
-- The nav bar is solid. No blur, no translucency, no shader effects.
+- Appearance settings apply to every surface, including the nav bar.
 
 ## Code style
 

@@ -7,7 +7,8 @@ Releases are built by GitHub Actions when a version tag is pushed, or when the R
 1. Move the "Unreleased" notes in `CHANGELOG.md` under a new `## [X.Y.Z] - YYYY-MM-DD` heading.
 2. Bump `versionName` (and increment `versionCode`) in `app/build.gradle.kts`.
 3. Commit, push to `main`, wait for `Android CI` to pass.
-4. Tag and push: `git tag -a vX.Y.Z -m "Stocker vX.Y.Z" && git push origin vX.Y.Z`.
+4. Tag and push: `git tag -a vX.Y.Z -m "Stocker vX.Y.Z" && git push origin vX.Y.Z`, or run the Release workflow
+   manually with the version number (this creates the tag for you).
 5. The workflow builds `Stocker-vX.Y.Z.apk`, writes a SHA-256 file, and publishes a GitHub Release whose notes come from
    the matching CHANGELOG section.
 
