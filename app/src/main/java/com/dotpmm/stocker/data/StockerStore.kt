@@ -106,7 +106,8 @@ class StockerStore(context: Context) {
         _watchlist.value = updated
         prefs.saveWatchlist(updated)
         bump()
-        launchRefresh(only = stock.ticker)
+        // The very first add also pulls indices and the shared feeds, so the watchlist is complete at once.
+        launchRefresh(only = if (prefs.lastRefresh == 0L) null else stock.ticker)
     }
 
     suspend fun remove(ticker: String) {

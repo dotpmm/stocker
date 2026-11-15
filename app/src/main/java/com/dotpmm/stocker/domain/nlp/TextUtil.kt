@@ -56,6 +56,20 @@ object TextUtil {
         return shared.toDouble() / (a.size + b.size - shared)
     }
 
+    /**
+     * Duplicate score between two headlines' token sets, 0 when they are not the same story.
+     * Syndicated copies reword headlines, so require high containment of the shorter one and a fair Jaccard overlap.
+     */
+    fun similarity(a: Set<String>, b: Set<String>): Double {
+        val smaller = minOf(a.size, b.size)
+        if (smaller < 4) return 0.0
+        var shared = 0
+        for (t in (if (a.size <= b.size) a else b)) if (t in (if (a.size <= b.size) b else a)) shared++
+        val containment = shared.toDouble() / smaller
+        val jaccard = shared.toDouble() / (a.size + b.size - shared)
+        return if (containment >= 0.8 && jaccard >= 0.5) jaccard else 0.0
+    }
+
     fun hash(text: String): String {
         val digest = MessageDigest.getInstance("SHA-1").digest(text.toByteArray(Charsets.UTF_8))
         return digest.take(8).joinToString("") { "%02x".format(it) }

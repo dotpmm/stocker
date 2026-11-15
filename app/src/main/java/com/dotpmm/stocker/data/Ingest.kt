@@ -28,7 +28,6 @@ class Ingest(private val db: StockerDb) {
 
     private val dedupeWindowMs = 48L * 3_600_000L
     private val maxAgeMs = 14L * 24L * 3_600_000L
-    private val similarity = 0.7
 
     /** Returns the number of new articles stored. */
     fun process(candidates: List<Candidate>, stocks: List<WatchStock>, now: Long): Int {
@@ -59,12 +58,12 @@ class Ingest(private val db: StockerDb) {
 
                 val tokens = TextUtil.tokens(TextUtil.normalizeTitle(title))
                 var cluster = id
-                if (tokens.size >= 3) {
+                if (tokens.size >= 4) {
                     var best = 0.0
                     for (k in known) {
                         if (kotlin.math.abs(k.publishedAt - published) > dedupeWindowMs) continue
-                        val score = TextUtil.jaccard(tokens, k.tokens)
-                        if (score >= similarity && score > best) {
+                        val score = TextUtil.similarity(tokens, k.tokens)
+                        if (score > 0.0 && score > best) {
                             best = score
                             cluster = k.cluster
                         }

@@ -17,8 +17,12 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Make gradlew executable
         run: chmod +x gradlew
+      - name: Unit tests
+        run: ./gradlew testDebugUnitTest --stacktrace
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace
+      - name: Build release APK (checks R8 shrinking)
+        run: ./gradlew assembleRelease --stacktrace
       - uses: actions/upload-artifact@v4
         with:
           name: stocker-debug-apk

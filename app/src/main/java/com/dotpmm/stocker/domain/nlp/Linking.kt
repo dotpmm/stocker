@@ -11,9 +11,16 @@ class Linker(stocks: List<WatchStock>) {
 
     private val entries: List<Entry> = stocks.map { stock ->
         val aliases = (listOf(Names.clean(stock.name)) + stock.aliases).map { it.trim() }.filter { it.length >= 3 }.distinct()
-        val names = aliases.map { boundary(it, ignoreCase = true) }
+        // Multi-word names match any case. Single words ("Reliance", "Titan") must be capitalised or upper-case,
+        // so "heavy reliance on exports" does not link to Reliance Industries.
+        val names = aliases.map { if (it.contains(' ')) boundary(it, ignoreCase = true) else singleWord(it) }
         val tickerRegex = if (stock.ticker.length >= 3) boundary(stock.ticker, ignoreCase = false) else null
         Entry(stock.ticker, names, tickerRegex)
+    }
+
+    private fun singleWord(text: String): Regex {
+        val body = Regex.escape(text) + "|" + Regex.escape(text.uppercase())
+        return Regex("(?<![\\p{L}\\p{N}])(?:$body)(?![\\p{L}\\p{N}])")
     }
 
     private fun boundary(text: String, ignoreCase: Boolean): Regex {
