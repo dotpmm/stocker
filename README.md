@@ -110,15 +110,6 @@ pushing a `v*` tag, see [docs/releasing.md](docs/releasing.md).
 Read [CONTRIBUTING.md](CONTRIBUTING.md) first, then open an issue or a pull request. Bug reports and news-source
 suggestions are especially welcome.
 
-## Contributors
-
-| | Contributor | Role |
-| --- | --- | --- |
-| <a href="https://github.com/dotpmm"><img src="https://github.com/dotpmm.png" width="56" alt="dotpmm"></a> | [**Prajwal (@dotpmm)**](https://github.com/dotpmm) | Creator, product and design decisions, maintainer |
-
-Stocker is built with AI assistance (Claude by Anthropic) under the direction and review of the maintainer.
-Want to see your name here? See [CONTRIBUTING.md](CONTRIBUTING.md).
-
 ## Acknowledgements
 
 - [Inter](https://rsms.me/inter/) and [Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk), SIL Open Font License 1.1 ([licences](docs/third-party/))
