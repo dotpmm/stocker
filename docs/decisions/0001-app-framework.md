@@ -1,6 +1,6 @@
 # ADR 0001: Native Android (Kotlin + Jetpack Compose) vs Flutter
 
-- Status: **Proposed** (recommendation made, awaiting owner's confirmation)
+- Status: **Accepted** (owner confirmed 2026-11-15: native Kotlin, no Flutter)
 - Date: 2026-11-15
 
 ## Context
@@ -9,7 +9,7 @@ Stocker is Android-first, runs entirely on-device, needs reliable 12-hour backgr
 extremely polished in a pitch-black theme. The owner will later share it with friends and others, and is already
 doing Android development. Open question: Kotlin/Compose or Flutter.
 
-## Recommendation: Kotlin + Jetpack Compose
+## Decision: Kotlin + Jetpack Compose
 
 1. **Background work is the core feature.** WorkManager is first-class on native Android. In Flutter, the same
    feature goes through a plugin that spins up a separate Dart isolate, which is more fragile on aggressive OEM

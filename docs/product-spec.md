@@ -52,6 +52,6 @@ differentiators.
 
 ## Open questions
 
-- Native Kotlin vs Flutter (see `docs/decisions/0001-app-framework.md`).
+- ~~Native Kotlin vs Flutter~~ Decided: native Kotlin (`docs/decisions/0001-app-framework.md`).
 - Design language: Material 3 Expressive vs custom pitch-black system vs Liquid-Glass-inspired.
 - How to access exchange filings from Android given bot protection (best-effort only, see research).
