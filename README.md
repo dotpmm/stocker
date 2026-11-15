@@ -26,6 +26,7 @@ turns the day's news into a clean, per-company feed. No backend, no accounts: ev
 | `docs/research/github-prior-art.md` | Existing open-source projects reviewed and what to borrow |
 | `docs/research/fundamentals-data.md` | Free data options for the later number fetcher |
 | `docs/architecture.md` | On-device pipeline design |
+| `docs/design-directions.md` | Three visual directions compared, recommended tokens |
 | `docs/decisions/` | Architecture decision records (ADRs) |
 
 Not financial advice. Any AI or rule-based verdict in the app is informational only.
