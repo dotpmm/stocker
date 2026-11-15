@@ -1,4 +1,4 @@
-# Stocker product spec (draft, pre-build)
+# Stocker product spec
 
 Owner: Prajwal (GitHub: dotpmm). Last updated: 2026-11-15.
 

@@ -41,3 +41,17 @@ pipeline immediately. Background work only fetches and processes; notifications 
 - `domain/nlp`: dedupe, entity linking, sentiment, event tagging, scoring
 - `domain/ai`: Gemini client, prompt builder, cache
 - `ui`: watchlist, stock detail, reader, events, settings, source health
+
+## As built (v1.5)
+
+- `data/net`: `Http` (per-host gate), `FeedParser` (RSS/Atom), `Sources` (feed list, Google News URLs), `Yahoo`
+  (search and charts), `ArticleReader` (reader-mode extraction).
+- `data`: `Ingest` (rule-based pipeline), `StockerStore` (refresh engine and queries), `AppPrefs`, `Popular`.
+- `data/db`: `StockerDb` (articles, article_stock, events, quotes, chart_cache, ai_cache, source_health).
+- `domain/nlp`: `Sentiment`, `EventTagger`, `EventExtractor`, `Linker`, `Credibility`, `Impact`, `TextUtil`.
+- `domain/ai`: `Gemini` (model discovery, prompt, parsing).
+- `work`: `RefreshWorker` and `RefreshScheduler` (12 hours, network required).
+- Duplicates: headlines are tokenised; two stories within 48 hours with at least 80 percent containment and 50 percent
+  Jaccard overlap share a cluster, and the best-credibility copy represents it.
+- Events come from dates found in news text (not from exchange filings yet); an event attaches to the most strongly
+  linked company.

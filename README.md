@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/dotpmm/stocker/actions/workflows/android.yml"><img alt="Android CI" src="https://github.com/dotpmm/stocker/actions/workflows/android.yml/badge.svg"></a>
-  <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-9DB8FF">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.5.0-9DB8FF">
   <img alt="Android 8.0+" src="https://img.shields.io/badge/Android-8.0%2B-3DDC97">
   <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-Jetpack%20Compose-7F52FF">
   <img alt="License" src="https://img.shields.io/badge/license-proprietary-555">
@@ -15,11 +15,12 @@
 
 ---
 
-## Status: v1.0.0 is a UI preview
+## Status: v1.5, the first working app
 
-The first release ships the finished **Obsidian** interface running on **sample data**. The stocks, prices and
-headlines you see are illustrative. Live news, prices, background polling and AI summaries are the next milestones
-(see the [roadmap](#roadmap)). It is installable and fully navigable, and is meant for judging the look and feel.
+v1.5 replaces the sample data of v1.0 with the real thing: live news from curated feeds, per-company sorting,
+tone and event tags, prices for Indian stocks, a 12-hour background refresh, a reader, and an optional Gemini
+summary. It is a first build of the data layer, so some feeds will be down or blocked on any given day; the
+**Source health** list in Settings shows exactly which ones worked on your phone.
 
 Get it from the [Releases](https://github.com/dotpmm/stocker/releases) page (Android 8.0 or newer). The repository
 is currently private, so releases are visible only to people with access.
@@ -42,15 +43,20 @@ requests to the news feeds and to Gemini when you press the button.
 ## Features
 
 - [x] Obsidian design system: pure black canvas, no borders or cards, Inter and Space Grotesk, tabular numerals
-- [x] Watchlist with index strip (NIFTY 50, SENSEX), India / US tabs and trend lines
-- [x] Stock detail: price, 1D to 1Y chart ranges, news-tone bar, upcoming events, news list
-- [x] Floating solid navigation bar with sliding highlight and spring icons (no blur, light on the GPU)
-- [x] Material-3 style motion with press feedback on every tap target
-- [ ] Live news pipeline: RSS and Google News feeds, de-duplication, per-company linking
-- [ ] Rule-based sentiment and event tagging (earnings, deals, regulatory, management)
-- [ ] 12-hour background refresh (WorkManager) and manual refresh
-- [ ] Add stocks by name or ticker, CSV import
-- [ ] Clean article reader and optional Gemini summary
+- [x] Watchlist of NSE, BSE and US stocks, added by company name or ticker (built-in suggestions work offline)
+- [x] News from about 20 sources: ET, Mint, BusinessLine, NDTV Profit, Pulse, SEBI, RBI, CNBC, MarketWatch, plus
+      Moneycontrol, Business Standard, CNBC-TV18 and Financial Express through Google News
+- [x] Per-company news sorted without AI: entity linking, duplicate clustering ("+3 sources"), event tags
+- [x] Rule-based tone (positive / neutral / negative) per story and per stock
+- [x] Upcoming events (results, board meetings, record dates) detected from news
+- [x] Prices, 1D to 1Y charts and NIFTY 50 / SENSEX for Indian stocks (unofficial Yahoo Finance endpoint)
+- [x] Reader view with related coverage and a link to the original
+- [x] Optional AI summary with your own Gemini key, cached per set of stories
+- [x] 12-hour background refresh, plus refresh on demand and when you open the app after a while
+- [x] Source health screen
+- [ ] Topic profiles for indirect-impact news (peers, executives, regulators)
+- [ ] NSE and BSE exchange filings (bot-protected, needs a WebView cookie approach)
+- [ ] CSV watchlist import, home-screen widgets
 - [ ] Fundamentals "number fetcher": P/E, P/B, 52-week range, revenue and charts
 
 ## Design
@@ -62,8 +68,9 @@ the only floating element is the navigation bar. The rules and the reasoning are
 ## Tech
 
 Kotlin 2.2, Jetpack Compose (Material 3), AGP 8.11, Gradle 8.14 with a version catalog, minSdk 26, targetSdk 36,
-R8 minification and resource shrinking on release. Planned: Room, WorkManager, Ktor/OkHttp, kotlinx.serialization.
-Details in [docs/architecture.md](docs/architecture.md).
+R8 minification and resource shrinking on release. Deliberately few dependencies: plain SQLite, the platform HTTP
+and XML parsers, WorkManager and coroutines, so there is no annotation-processing step to break. Unit tests cover
+the rule-based language pipeline. Details in [docs/architecture.md](docs/architecture.md).
 
 ## Build
 
@@ -78,10 +85,10 @@ pushing a `v*` tag, see [docs/releasing.md](docs/releasing.md).
 
 ## Roadmap
 
-1. **v1.0 (this release)**: Obsidian UI on sample data.
-2. **v1.1**: data layer (Room), feed fetching, de-duplication and per-company news.
-3. **v1.2**: sentiment/event tagging, upcoming events, 12-hour background refresh.
-4. **v1.3**: add-stock search, article reader, Gemini summary sheet, settings and source health.
+1. **v1.0**: Obsidian UI on sample data.
+2. **v1.5 (this release)**: live news pipeline, prices, events, reader, AI summary, background refresh.
+3. **v1.6**: topic profiles for indirect-impact news, per-source on/off, notifications (off by default).
+4. **v1.7**: exchange filings, CSV import, widgets.
 5. **v2**: fundamentals number fetcher and AI questions over those numbers.
 
 ## Documentation
@@ -95,6 +102,7 @@ pushing a `v*` tag, see [docs/releasing.md](docs/releasing.md).
 | [Prior art](docs/research/github-prior-art.md) | What similar open projects do |
 | [Fundamentals data](docs/research/fundamentals-data.md) | Where the numbers could come from |
 | [Decision 0001](docs/decisions/0001-app-framework.md) | Why native Kotlin |
+| [Decision 0002](docs/decisions/0002-storage-and-dependencies.md) | Why plain SQLite and few dependencies |
 | [Building](docs/building.md) / [Releasing](docs/releasing.md) | Build and release process |
 
 ## Contributing
