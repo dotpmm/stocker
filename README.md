@@ -3,8 +3,9 @@
 A free, pitch-black Android app that watches a stock watchlist (NSE/BSE first, with a US news section) and
 turns the day's news into a clean, per-company feed. No backend, no accounts: everything runs on the device.
 
-> Status: **planning / pre-build.** No app code yet. See `docs/` for the product spec, source research and
-> architecture decisions.
+> Status: **early build.** Native Kotlin + Jetpack Compose. The Obsidian design system, watchlist and stock-detail
+> screens exist with sample data; the news pipeline is next. See `docs/building.md` to build, and `docs/` for the
+> product spec, source research and architecture decisions.
 
 ## What it will do
 
@@ -26,6 +27,7 @@ turns the day's news into a clean, per-company feed. No backend, no accounts: ev
 | `docs/research/github-prior-art.md` | Existing open-source projects reviewed and what to borrow |
 | `docs/research/fundamentals-data.md` | Free data options for the later number fetcher |
 | `docs/architecture.md` | On-device pipeline design |
+| `docs/building.md` | How to build and run, CI |
 | `docs/design-directions.md` | Three visual directions compared, recommended tokens |
 | `docs/decisions/` | Architecture decision records (ADRs) |
 
