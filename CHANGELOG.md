@@ -3,7 +3,20 @@
 All notable changes to Stocker are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [2.2.0] - 2026-11-19
+
+### Added
+- **Market heatmap on Markets.** A sector-by-sector squarified treemap below the macro plates:
+  tile area is market cap, fill intensity is the day move, and groups cover the full Nifty-200
+  industry set (Financials, IT, Oil & Gas, Autos, Telecom, Healthcare, FMCG, Power and more).
+- **Pinned quote card.** Tapping a tile pins a popover beside it with price, day change, volume,
+  day high/low and a 5-day sparkline. "Details" opens the existing deep-dive sheet.
+- `squarify` layout and heatmap parser tests, plus a rendered heatmap screenshot.
+
+### Changed
+- **The floating nav bar is flat.** No metal gradients, bevels, ambient glow or 100% pill
+  rounding; it is now a solid surface with a hairline and a 18dp radius. The obsolete
+  "Metal nav bar" setting was removed.
 
 ## [2.1.0] - 2026-11-15
 

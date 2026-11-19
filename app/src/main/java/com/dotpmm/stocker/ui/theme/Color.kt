@@ -5,8 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import com.dotpmm.stocker.settings.AccentIntensity
 import com.dotpmm.stocker.settings.BaseTone
+import kotlin.math.abs
 
 /**
  * One complete colour set, produced by [paletteFor] from the tone and accent settings and swapped
@@ -222,6 +224,18 @@ fun Direction.glyph(): String = when (this) {
     Direction.Up -> "▲"
     Direction.Down -> "▼"
     Direction.Flat -> ""
+}
+
+/**
+ * Treemap fill for a day move. The hue is the direction; intensity ramps with the magnitude so a
+ * +0.1% tile is nearly the surface colour and a +4% tile is fully saturated. Text stays white on
+ * every step because the midpoint is always dark.
+ */
+fun heatColor(changePct: Double?): Color {
+    if (changePct == null || abs(changePct) < 0.005) return Ink.Surface3
+    val intensity = (abs(changePct) / 4.0).coerceIn(0.0, 1.0).toFloat()
+    val target = if (changePct > 0) Color(0xFF12A45B) else Color(0xFFD6363F)
+    return lerp(Ink.Surface3, target, 0.22f + 0.78f * intensity)
 }
 
 /**

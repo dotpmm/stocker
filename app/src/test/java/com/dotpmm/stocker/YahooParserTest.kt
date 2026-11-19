@@ -89,6 +89,23 @@ class YahooParserTest {
         assertNotNull("TITAN present", titan)
         assertEquals(61.149815, titan!!.pe!!, 1e-6)
         assertEquals(4298939301888.0, titan.mcap!!, 1.0)
+        assertEquals(4844.9, titan.price!!, 1e-9)
+        assertEquals(-1.5644366, titan.changePct!!, 1e-6)
+    }
+
+    @Test
+    fun `batch quotes expose heatmap fields and derive a missing change`() {
+        val body = """{"quoteResponse":{"result":[{
+            "symbol":"SBIN.NS","trailingPE":9.5,"marketCap":720000000000,
+            "regularMarketPrice":810.0,"regularMarketPreviousClose":800.0,
+            "regularMarketVolume":1234567,"regularMarketDayHigh":815.5,"regularMarketDayLow":798.0
+        }]}}"""
+        val row = YahooParsers.batchQuotes(body).getValue("SBIN")
+        assertEquals(1.25, row.changePct!!, 1e-9)
+        assertEquals(1_234_567L, row.volume)
+        assertEquals(815.5, row.dayHigh!!, 1e-9)
+        assertEquals(798.0, row.dayLow!!, 1e-9)
+        assertEquals(800.0, row.previousClose!!, 1e-9)
     }
 
     @Test

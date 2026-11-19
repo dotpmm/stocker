@@ -75,6 +75,18 @@ object Fmt {
         }
     }
 
+    /** Share volume in market shorthand: 12.4M, 1.2B, 845K. */
+    fun volume(shares: Long?): String {
+        if (shares == null || shares <= 0L) return "—"
+        val value = shares.toDouble()
+        return when {
+            value >= 1_000_000_000 -> String.format(Locale.US, "%.2fB", value / 1_000_000_000)
+            value >= 1_000_000 -> String.format(Locale.US, "%.2fM", value / 1_000_000)
+            value >= 1_000 -> String.format(Locale.US, "%.1fK", value / 1_000)
+            else -> groupIndian(shares.toString())
+        }
+    }
+
     /** Hero index value: grouped, no currency symbol, 1 decimal. */
     fun index(value: Double?): String =
         if (value == null) "—" else String.format(Locale.US, "%s", grouped(value, 1))

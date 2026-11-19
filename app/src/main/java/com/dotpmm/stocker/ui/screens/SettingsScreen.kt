@@ -165,11 +165,6 @@ fun SettingsScreen(settingsStore: SettingsStore, contentPadding: PaddingValues) 
                 settings.directionGlyphs,
             ) { update { s -> s.copy(directionGlyphs = it) } }
             ToggleRow(
-                "Metal nav bar",
-                "Finish on the floating bar.",
-                settings.metalNavBar,
-            ) { update { s -> s.copy(metalNavBar = it) } }
-            ToggleRow(
                 "Swipe between tabs",
                 "Drag sideways to change tab.",
                 settings.swipeTabs,

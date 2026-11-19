@@ -7,12 +7,12 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,7 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -36,17 +36,16 @@ import com.dotpmm.stocker.ui.theme.Ink
 import com.dotpmm.stocker.ui.theme.LocalReducedMotion
 import com.dotpmm.stocker.ui.theme.Motion
 import com.dotpmm.stocker.ui.theme.Type
-import com.dotpmm.stocker.ui.theme.LocalSettings
-import com.dotpmm.stocker.ui.theme.ambientGlow
-import com.dotpmm.stocker.ui.theme.flat
-import com.dotpmm.stocker.ui.theme.metal
 
 data class NavItem(val label: String, val icon: ImageVector)
 
+private val barShape = RoundedCornerShape(18.dp)
+private val indicatorShape = RoundedCornerShape(11.dp)
+
 /**
- * The floating bottom navigation (design.md §10.2). A metal-lit pill lifted off the edge: the
- * selected tab gets a sliding raised plate, a white inner glow and a spring-lifted icon. Nothing
- * else on the bar glows — glow is earned by state.
+ * The floating bottom navigation (design.md §10.2), now flat by design: a solid charcoal plate with
+ * one hairline, a sliding surface-toned indicator and no metal gradients, glow or pill rounding.
+ * The selected tab is the only raised state on the bar.
  */
 @Composable
 fun FloatingNavBar(
@@ -55,41 +54,34 @@ fun FloatingNavBar(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val reduced = LocalReducedMotion.current
-    // The bar itself follows the metal setting; the active plate is always raised so the
-    // selection stays legible even when the bar is flat.
-    val settings = LocalSettings.current
-    val bar = if (settings.metalNavBar) {
-        Modifier.metal(Ink.Surface2, RoundedCornerShape(999.dp), 999.dp, lifted = true)
-    } else {
-        Modifier.flat(Ink.Surface3, RoundedCornerShape(999.dp), 999.dp)
-    }
     Box(
         modifier
-            .padding(horizontal = 18.dp)
+            .padding(horizontal = 16.dp)
             .fillMaxWidth()
-            .height(62.dp)
-            // The ambient glow is clipped to the pill, so it traces the rounded ends on all sides.
-            .then(bar)
-            .ambientGlow(RoundedCornerShape(999.dp), 999.dp, intensity = 0.55f),
+            .height(60.dp)
+            .clip(barShape)
+            .background(Ink.Surface2)
+            .border(1.dp, Color.White.copy(alpha = 0.06f), barShape),
     ) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
+            val reduced = LocalReducedMotion.current
             val slot = maxWidth / items.size
             val indicatorX by animateDpAsState(
                 targetValue = slot * selectedIndex,
-                animationSpec = if (reduced) tween(120) else spring(
-                    dampingRatio = 0.78f, stiffness = Spring.StiffnessMediumLow,
-                ),
-                label = "navPlate",
+                animationSpec = if (reduced) {
+                    tween(120)
+                } else {
+                    spring(dampingRatio = 0.82f, stiffness = Spring.StiffnessMediumLow)
+                },
+                label = "navIndicator",
             )
-            // The sliding plate: raised surface + white rim glow on the active slot only.
             Box(
                 Modifier
-                    .padding(6.dp)
+                    .padding(5.dp)
                     .offset(x = indicatorX)
-                    .size(slot - 12.dp, 50.dp)
-                    .metal(Ink.Surface3, RoundedCornerShape(999.dp), 999.dp, lifted = true)
-                    .ambientGlow(RoundedCornerShape(999.dp), 999.dp, intensity = 0.7f),
+                    .size(slot - 10.dp, 50.dp)
+                    .clip(indicatorShape)
+                    .background(Ink.Surface3),
             )
             Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
                 items.forEachIndexed { index, item ->
@@ -116,10 +108,9 @@ private fun NavTab(
     val springSpec = if (reduced) {
         tween<Float>(120)
     } else {
-        spring(dampingRatio = 0.55f, stiffness = 420f)
+        spring(dampingRatio = 0.6f, stiffness = 420f)
     }
-    val iconScale by animateFloatAsState(if (selected) 1.12f else 1f, springSpec, label = "navScale")
-    val iconLift by animateFloatAsState(if (selected) -1.5f else 0f, springSpec, label = "navLift")
+    val iconScale by animateFloatAsState(if (selected) 1.08f else 1f, springSpec, label = "navScale")
     val color by animateColorAsState(
         targetValue = if (selected) Ink.TextPrimary else Ink.TextMuted,
         animationSpec = tween(Motion.Fast, easing = Motion.Fluid),
@@ -127,8 +118,8 @@ private fun NavTab(
     )
     Column(
         modifier = Modifier
-            .size(width = slotWidth, height = 62.dp)
-            .pressable(onClick = onClick, pressedScale = 0.94f, role = Role.Tab),
+            .size(width = slotWidth, height = 60.dp)
+            .pressable(onClick = onClick, pressedScale = 0.95f, role = Role.Tab),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -141,7 +132,6 @@ private fun NavTab(
                 .graphicsLayer {
                     scaleX = iconScale
                     scaleY = iconScale
-                    translationY = iconLift * density
                 },
         )
         Box(Modifier.height(4.dp))
