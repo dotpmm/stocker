@@ -38,6 +38,10 @@ market-cap-weighted trailing P/E against a 5Y baseline. Tap a sector for every m
 stock in it, filtered by the persisted Coffee-Can toggles. Tap a row for the deep-dive: verdict,
 valuation gauge, fundamentals, and a noise-filter chart with earnings dots.
 
+**The market heatmap.** Below the macro plates, every Nifty-200 industry is its own squarified
+treemap: tile area is market cap, fill intensity is the day move. Tap a tile to pin a quote card
+(price, day change, volume, day range, 5-day sparkline) and open the deep-dive from it.
+
 The research philosophy: **the economic cycle first, stocks last. The valuation gauge and the 5Y
 revenue CAGR are the noise filter.**
 
@@ -88,11 +92,13 @@ render fully drawn, the ticker stops rolling, and the burst never fires.
 - [x] NIFTY hero, six sector plates, verdict badges, market-cap-weighted P/E vs 5Y baseline
 - [x] Sector drill-down with persisted filters (Structure / Valuation / Growth & Size)
 - [x] Deep-dive: reality-check gauge, narrative, fundamentals, noise-filter chart, earnings dots
+- [x] Market heatmap: squarified treemap per NSE industry, sized by market cap, coloured by day move
+- [x] Pinned quote card per heatmap tile with a 5-day sparkline and a link to the deep-dive
 - [x] Universe-wide search by ticker or company name
 - [x] Google Finance deep link per stock
 
 **Craft**
-- [x] Metal + blur design system with the full Neural Expressive motion set
+- [x] Metal + blur design system with the full Neural Expressive motion set, and a flat floating nav bar
 - [x] AMOLED mode that keeps the metal readable
 - [x] Extensive appearance and behaviour settings, all live
 - [x] TTL cache with stale-serve-on-failure
@@ -147,7 +153,7 @@ suggestions are especially welcome.
 ## Credits
 
 - [@woterr](https://github.com/woterr): Markets tab, sector filters, deep-dive sheet, settings, and the v2 design
-  system (pull request #1)
+  system (pull request #1); the v2.2 market heatmap, quote card and flat nav bar (pull request #2)
 
 ## Licence
 
