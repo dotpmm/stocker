@@ -28,6 +28,40 @@ data class SectorCard(
 /** Hero index payload. */
 data class Hero(val value: Double?, val changePct: Double?, val sparkline: List<Float>)
 
+/** One stock tile in the market heatmap. [mcapCr] drives the tile area. */
+data class HeatmapStock(
+    val symbol: String,
+    val name: String,
+    val price: Double?,
+    val changePct: Double?,
+    val volume: Long?,
+    val dayHigh: Double?,
+    val dayLow: Double?,
+    val mcapCr: Double?,
+)
+
+/** A heatmap group — the NSE industry label plus its constituents. */
+data class HeatmapSector(
+    val name: String,
+    val stocks: List<HeatmapStock>,
+) {
+    val totalMcapCr: Double
+        get() = stocks.sumOf { it.mcapCr ?: 0.0 }
+
+    /** Market-cap weighted day move, used for the group header. */
+    val changePct: Double?
+        get() {
+            if (stocks.isEmpty()) return null
+            val weights = stocks.sumOf { it.mcapCr ?: 0.0 }
+            if (weights <= 0.0) {
+                val changes = stocks.mapNotNull { it.changePct }
+                return if (changes.isEmpty()) null else changes.average()
+            }
+            val weighted = stocks.sumOf { (it.mcapCr ?: 0.0) * (it.changePct ?: 0.0) }
+            return weighted / weights
+        }
+}
+
 data class MacroSnapshot(
     val hero: Hero,
     val sectors: List<SectorCard>,
@@ -109,6 +143,7 @@ private object Ttl {
     const val STOCK_1Y = 6 * 3_600_000L
     const val STOCK_5Y = 7 * 3_600_000L
     const val SECTOR_PE = 6 * 3_600_000L
+    const val HEATMAP = 5 * 60_000L
     const val H5D = 15 * 60_000L
     const val H1M = 30 * 60_000L
     const val H6M = 90 * 60_000L
@@ -223,6 +258,102 @@ class ResearchRepository(context: Context) {
             blurb = sector.blurb,
             sparkline = points.map { it.c.toFloat() },
         )
+    }
+
+    // ── Market heatmap ───────────────────────────────────────────
+
+    /**
+     * The Nifty-200 universe grouped by NSE industry. The batch quote call returns market cap,
+     * day change, volume and the day range, so one cached pass feeds the whole treemap.
+     */
+    suspend fun heatmap(): List<HeatmapSector> {
+        val body = cachedJson("heatmap:v1", Ttl.HEATMAP) { fetchHeatmapJson() }
+        return parseHeatmap(body)
+    }
+
+    /** A light 5-day intraday sparkline for the heatmap popover — no earnings or fundamentals. */
+    suspend fun sparkline(symbolRaw: String): List<Float> {
+        val symbol = symbolRaw.uppercase()
+        val body = cachedJson("spark5d:$symbol", Ttl.H5D) { fetchHistoryJson(symbol, "5d", "15m") }
+        return parsePoints(body).map { it.c.toFloat() }
+    }
+
+    private suspend fun fetchHeatmapJson(): String? {
+        val listed = universe.filter { it.industry.isNotBlank() }
+        if (listed.isEmpty()) return null
+        val quotes = runCatching { YahooResearch.quotes(listed.map { it.symbol }) }
+            .getOrDefault(emptyMap())
+        if (quotes.isEmpty()) return null
+
+        val sectors = listed.groupBy { it.industry }.mapNotNull { (industry, members) ->
+            val stocks = members.mapNotNull { entry ->
+                val quote = quotes[entry.symbol] ?: return@mapNotNull null
+                val change = quote.changePct?.takeIf { it.isFinite() } ?: return@mapNotNull null
+                HeatmapStock(
+                    symbol = entry.symbol,
+                    name = entry.name,
+                    price = quote.price?.takeIf { it.isFinite() },
+                    changePct = change,
+                    volume = quote.volume,
+                    dayHigh = quote.dayHigh?.takeIf { it.isFinite() },
+                    dayLow = quote.dayLow?.takeIf { it.isFinite() },
+                    mcapCr = quote.mcap?.takeIf { it.isFinite() && it > 0 }?.div(1e7),
+                )
+            }.sortedByDescending { it.mcapCr ?: 0.0 }
+            if (stocks.size < 2) null else HeatmapSector(industry, stocks)
+        }.sortedByDescending { it.totalMcapCr }
+        if (sectors.isEmpty()) return null
+
+        val root = org.json.JSONObject()
+        val sectorArray = org.json.JSONArray()
+        for (sector in sectors) {
+            val stockArray = org.json.JSONArray()
+            for (stock in sector.stocks) {
+                val o = org.json.JSONObject()
+                    .put("symbol", stock.symbol)
+                    .put("name", stock.name)
+                    .put("chg", stock.changePct)
+                    .put("mcap", stock.mcapCr ?: 0.0)
+                stock.price?.let { o.put("ltp", it) }
+                stock.volume?.let { o.put("vol", it) }
+                stock.dayHigh?.let { o.put("high", it) }
+                stock.dayLow?.let { o.put("low", it) }
+                stockArray.put(o)
+            }
+            sectorArray.put(
+                org.json.JSONObject().put("name", sector.name).put("stocks", stockArray),
+            )
+        }
+        root.put("sectors", sectorArray)
+        return root.toString()
+    }
+
+    private fun parseHeatmap(body: String?): List<HeatmapSector> {
+        if (body == null) return emptyList()
+        fun number(o: org.json.JSONObject, key: String): Double? =
+            if (o.has(key) && !o.isNull(key)) o.optDouble(key).takeIf { it.isFinite() } else null
+        return runCatching {
+            val arr = org.json.JSONObject(body).getJSONArray("sectors")
+            (0 until arr.length()).mapNotNull { i ->
+                val sector = arr.optJSONObject(i) ?: return@mapNotNull null
+                val name = sector.optString("name")
+                val rows = sector.optJSONArray("stocks") ?: org.json.JSONArray()
+                val stocks = (0 until rows.length()).mapNotNull { j ->
+                    val o = rows.optJSONObject(j) ?: return@mapNotNull null
+                    HeatmapStock(
+                        symbol = o.optString("symbol"),
+                        name = o.optString("name"),
+                        price = number(o, "ltp"),
+                        changePct = number(o, "chg"),
+                        volume = if (o.has("vol") && !o.isNull("vol")) o.optLong("vol") else null,
+                        dayHigh = number(o, "high"),
+                        dayLow = number(o, "low"),
+                        mcapCr = number(o, "mcap")?.takeIf { it > 0 },
+                    )
+                }
+                if (name.isBlank() || stocks.isEmpty()) null else HeatmapSector(name, stocks)
+            }
+        }.getOrDefault(emptyList())
     }
 
     // ── Sector drill-down ────────────────────────────────────────

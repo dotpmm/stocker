@@ -111,7 +111,18 @@ object YahooResearch {
 
     // ── Batch quotes (P/E + market cap for a whole sector) ───────
 
-    data class QuoteRow(val symbol: String, val pe: Double?, val mcap: Double?, val name: String?)
+    data class QuoteRow(
+        val symbol: String,
+        val pe: Double?,
+        val mcap: Double?,
+        val name: String?,
+        val price: Double? = null,
+        val changePct: Double? = null,
+        val volume: Long? = null,
+        val dayHigh: Double? = null,
+        val dayLow: Double? = null,
+        val previousClose: Double? = null,
+    )
 
     /**
      * Batched fundamentals for up to ~50 symbols. Cuts a sector load from 50 requests to a handful.
@@ -122,7 +133,9 @@ object YahooResearch {
         for (chunk in symbols.chunked(40)) {
             val joined = chunk.joinToString(",") { enc(nseSymbol(it)) }
             val url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=$joined" +
-                "&fields=trailingPE,marketCap,shortName,longName${crumbSuffix()}"
+                "&fields=trailingPE,marketCap,shortName,longName,regularMarketPrice," +
+                "regularMarketChangePercent,regularMarketVolume,regularMarketDayHigh," +
+                "regularMarketDayLow,regularMarketPreviousClose${crumbSuffix()}"
             val response = authed(url)
             if (!response.ok) continue
             out.putAll(YahooParsers.batchQuotes(response.body))

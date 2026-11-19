@@ -84,7 +84,10 @@ data class AppSettings(
     /** Show the ▲/▼ glyph next to percentages. Turning this off is a readability regression. */
     val directionGlyphs: Boolean = true,
     val motionLevel: MotionLevel = MotionLevel.Full,
-    /** Apply the metal finish to the floating nav bar too. Off keeps it a flat plate. */
+    /**
+     * Legacy field kept so existing preferences reload cleanly. The floating bar is flat in v2.2
+     * and no longer reads this flag.
+     */
     val metalNavBar: Boolean = true,
     /** Swipe left/right across a screen to change tab. */
     val swipeTabs: Boolean = true,

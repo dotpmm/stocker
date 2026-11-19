@@ -56,11 +56,29 @@ object YahooParsers {
             val o = rows.optJSONObject(i) ?: continue
             val sym = o.optString("symbol").substringBefore('.')
             if (sym.isEmpty()) continue
+            val price = o.optDoubleOrNull("regularMarketPrice")
+            val previous = o.optDoubleOrNull("regularMarketPreviousClose")
+            val change = o.optDoubleOrNull("regularMarketChangePercent")
+                ?: if (price != null && previous != null && previous > 0) {
+                    (price - previous) / previous * 100
+                } else {
+                    null
+                }
             out[sym] = YahooResearch.QuoteRow(
                 symbol = sym,
                 pe = o.optDoubleOrNull("trailingPE"),
                 mcap = o.optDoubleOrNull("marketCap"),
                 name = o.optString("longName").ifEmpty { o.optString("shortName") }.ifEmpty { null },
+                price = price,
+                changePct = change,
+                volume = if (o.has("regularMarketVolume") && !o.isNull("regularMarketVolume")) {
+                    o.optLong("regularMarketVolume")
+                } else {
+                    null
+                },
+                dayHigh = o.optDoubleOrNull("regularMarketDayHigh"),
+                dayLow = o.optDoubleOrNull("regularMarketDayLow"),
+                previousClose = previous,
             )
         }
         return out

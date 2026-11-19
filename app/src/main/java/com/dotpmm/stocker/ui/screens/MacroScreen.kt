@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dotpmm.stocker.research.HeatmapSector
 import com.dotpmm.stocker.research.MacroSnapshot
 import com.dotpmm.stocker.research.ResearchRepository
 import com.dotpmm.stocker.research.SectorCard
@@ -91,20 +92,31 @@ fun MacroScreen(
     val repository = remember(context) { ResearchRepository(context) }
     val scope = rememberCoroutineScope()
     var snapshot by remember { mutableStateOf<MacroSnapshot?>(null) }
+    var heatmap by remember { mutableStateOf(emptyList<HeatmapSector>()) }
     var loading by remember { mutableStateOf(true) }
+    var heatmapLoading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
 
     suspend fun load() {
         loading = snapshot == null
+        heatmapLoading = heatmap.isEmpty()
         error = null
-        try {
-            snapshot = repository.macro()
-        } catch (e: kotlinx.coroutines.CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            error = e.message ?: "Couldn't reach the market data."
-        } finally {
-            loading = false
+        kotlinx.coroutines.coroutineScope {
+            launch {
+                try {
+                    snapshot = repository.macro()
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    error = e.message ?: "Couldn't reach the market data."
+                } finally {
+                    loading = false
+                }
+            }
+            launch {
+                heatmap = runCatching { repository.heatmap() }.getOrDefault(emptyList())
+                heatmapLoading = false
+            }
         }
     }
 
@@ -114,6 +126,7 @@ fun MacroScreen(
         while (true) {
             kotlinx.coroutines.delay(10 * 60_000L)
             runCatching { snapshot = repository.macro() }
+            runCatching { repository.heatmap() }.onSuccess { heatmap = it }
         }
     }
 
@@ -125,6 +138,8 @@ fun MacroScreen(
         onOpenSector = onOpenSector,
         onOpenStock = onOpenStock,
         repository = repository,
+        heatmap = heatmap,
+        heatmapLoading = heatmapLoading,
         onRetry = { scope.launch { load() } },
     )
 }
@@ -139,6 +154,8 @@ fun MacroScreenContent(
     onOpenSector: (String) -> Unit,
     onOpenStock: (String) -> Unit,
     repository: ResearchRepository?,
+    heatmap: List<HeatmapSector> = emptyList(),
+    heatmapLoading: Boolean = false,
     onRetry: () -> Unit = {},
 ) {
     LazyColumn(Modifier.fillMaxSize(), contentPadding = contentPadding) {
@@ -208,6 +225,17 @@ fun MacroScreenContent(
             // Staggered emergence: each plate rises 12dp and settles, 60ms apart (design.md §8.2).
             Box(Modifier.entrance(delayMs = 60 * index, rise = 12f)) {
                 SectorPlate(card = card, onClick = { onOpenSector(card.id) })
+            }
+        }
+
+        item(key = "heatmap") {
+            Box(Modifier.entrance(delayMs = 120)) {
+                MarketHeatmap(
+                    sectors = heatmap,
+                    loading = heatmapLoading,
+                    repository = repository,
+                    onOpenStock = onOpenStock,
+                )
             }
         }
 

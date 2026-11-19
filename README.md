@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/dotpmm/stocker/actions/workflows/android.yml"><img alt="Android CI" src="https://github.com/dotpmm/stocker/actions/workflows/android.yml/badge.svg"></a>
-  <img alt="Version" src="https://img.shields.io/badge/version-2.1.0-9DB8FF">
+  <img alt="Version" src="https://img.shields.io/badge/version-2.2.0-9DB8FF">
   <img alt="Android 8.0+" src="https://img.shields.io/badge/Android-8.0%2B-3DDC97">
   <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-Jetpack%20Compose-7F52FF">
   <img alt="License" src="https://img.shields.io/badge/license-proprietary-555">
@@ -15,13 +15,14 @@
 
 ---
 
-## Status: v2.1, news plus research
+## Status: v2.2, a heatmap for the market
 
 v2.0 added the Coffee-Can macro research surface described in [`FUNCTIONALITY.md`](FUNCTIONALITY.md),
 rendered in the metal-and-blur language of [`design.md`](design.md). **Everything from v1.5 is still
 here** — the watchlist, the news pipeline, the reader, events and the optional Gemini summary — all
-restyled into the same system. v2.1 is a polish pass: larger type, a lighter metal treatment and much
-smoother scrolling.
+restyled into the same system. v2.1 was a polish pass: larger type, a lighter metal treatment and much
+smoother scrolling. v2.2 adds a market-cap-weighted heatmap below the macro plates, a pinned quote
+card for every tile, and a flat bottom bar.
 
 ## What Stocker is
 
@@ -95,7 +96,7 @@ render fully drawn, the ticker stops rolling, and the burst never fires.
 - [x] AMOLED mode that keeps the metal readable
 - [x] Extensive appearance and behaviour settings, all live
 - [x] TTL cache with stale-serve-on-failure
-- [x] 267 unit tests, including reference-parity and render harnesses
+- [x] 273 unit tests, including reference-parity and render harnesses
 - [ ] Light mode (the palette inverts; the direction pair is unchanged)
 - [ ] Home-screen widget for the macro verdicts
 
@@ -116,7 +117,7 @@ reference implementation and pinned by tests in `ReferenceParityTest`.
 git clone https://github.com/dotpmm/stocker.git
 cd stocker
 ./gradlew assembleDebug          # app/build/outputs/apk/debug/app-debug.apk
-./gradlew testDebugUnitTest      # 267 tests
+./gradlew testDebugUnitTest      # 273 tests
 ```
 
 Requires JDK 17+ and the Android SDK (platform 36). Releases are built by GitHub Actions, see
